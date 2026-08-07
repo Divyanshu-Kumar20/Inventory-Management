@@ -56,7 +56,7 @@ export const Login = () => {
       return;
     }
     setMagicLinkSent(true);
-    toast.success(`One-Time Magic Login Link sent to ${targetEmail}`, 'Email Sent');
+    toast.success(`One-Time Magic Login Link generated for ${targetEmail}`, 'Email Link Ready');
   };
 
   const handleDirectEmailLogin = () => {
@@ -304,7 +304,7 @@ export const Login = () => {
       <Modal
         isOpen={showForgotModal}
         onClose={() => setShowForgotModal(false)}
-        title="Forgot Password / Login via Email"
+        title="Forgot Password / Instant Magic Link"
         footer={
           <>
             <Button variant="outline" onClick={() => setShowForgotModal(false)}>Cancel</Button>
@@ -314,14 +314,14 @@ export const Login = () => {
               </Button>
             ) : (
               <Button variant="primary" icon={Send} onClick={handleSendMagicLink}>
-                Send Magic Link
+                Generate Magic Link
               </Button>
             )}
           </>
         }
       >
         <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-          Forgot your password? Enter your registered work email address below to receive a secure one-time Magic Login link.
+          Forgot your password? Enter your registered work email address below to generate an instant one-time login link.
         </p>
 
         <Input
@@ -345,7 +345,7 @@ export const Login = () => {
               fontSize: '0.85rem'
             }}
           >
-            <strong>✨ Magic Link Ready:</strong> A single-use login link has been dispatched to <strong>{forgotEmail}</strong>. You can click below to simulate immediate email link authentication.
+            <strong>✨ Magic Link Ready:</strong> Click the blue <strong>"Login Now via Email Link"</strong> button below to sign in instantly without needing a password.
           </div>
         )}
       </Modal>
