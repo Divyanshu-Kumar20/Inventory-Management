@@ -1,0 +1,28 @@
+# Dependency Directories
+node_modules
+client/node_modules
+server/node_modules
+backend code/server/node_modules
+
+# Production Build Output
+client/dist
+client/build
+
+# Environment & Secrets
+.env
+*.env
+
+# Server Logs & Uploads
+logs/
+server/logs/
+backend code/server/logs/
+backend code/server/src/uploads/*
+!backend code/server/src/uploads/.gitkeep
+server/src/uploads/*
+!server/src/uploads/.gitkeep
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

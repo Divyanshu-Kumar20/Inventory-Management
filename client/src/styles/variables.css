@@ -1,0 +1,121 @@
+/* CSS Variables - NextGen Enterprise SaaS Design System */
+
+:root {
+  /* Primary & Accent Color Palette */
+  --primary: #4F46E5;
+  --primary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --primary-hover: #4338CA;
+  --primary-light: #EEF2FF;
+  --primary-glow: rgba(99, 102, 241, 0.25);
+
+  --accent-cyan: #06B6D4;
+  --accent-purple: #8B5CF6;
+
+  /* Canvas & Surface Colors */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F1F5F9;
+
+  /* Sidebar Theme */
+  --sidebar-bg: #090D16;
+  --sidebar-hover: #1E293B;
+  --sidebar-active: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --sidebar-text: #94A3B8;
+  --sidebar-text-active: #FFFFFF;
+
+  /* Cards & Elevational Surfaces */
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --card-shadow-hover: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+
+  /* Typography Colors */
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+
+  /* Inputs & Form Elements */
+  --border-color: #E2E8F0;
+  --input-bg: #FFFFFF;
+  --input-border: #CBD5E1;
+  --input-focus-border: #6366F1;
+
+  /* Status Indicators (Emerald, Amber, Rose, Cyan) */
+  --success: #10B981;
+  --success-bg: #ECFDF5;
+  --success-text: #047857;
+
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-text: #B45309;
+
+  --danger: #F43F5E;
+  --danger-bg: #FFF1F2;
+  --danger-text: #BE123C;
+
+  --info: #06B6D4;
+  --info-bg: #ECFEFF;
+  --info-text: #0E7490;
+
+  /* Typography */
+  --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Layout Dimensions */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+  --navbar-height: 68px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Smooth Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] {
+  --primary: #6366F1;
+  --primary-gradient: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
+  --primary-hover: #4F46E5;
+  --primary-light: rgba(99, 102, 241, 0.15);
+  --primary-glow: rgba(99, 102, 241, 0.35);
+
+  --bg-primary: #070A11;
+  --bg-secondary: #0F172A;
+  --bg-tertiary: #1E293B;
+
+  --sidebar-bg: #070A11;
+  --sidebar-hover: #1E293B;
+  --sidebar-active: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --sidebar-text: #94A3B8;
+  --sidebar-text-active: #FFFFFF;
+
+  --card-bg: #0F172A;
+  --card-border: #1E293B;
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+
+  --border-color: #1E293B;
+  --input-bg: #1E293B;
+  --input-border: #334155;
+  --input-focus-border: #818CF8;
+
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --success-text: #34D399;
+
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --warning-text: #FBBF24;
+
+  --danger-bg: rgba(244, 63, 94, 0.15);
+  --danger-text: #FB7185;
+
+  --info-bg: rgba(6, 182, 212, 0.15);
+  --info-text: #22D3EE;
+}
