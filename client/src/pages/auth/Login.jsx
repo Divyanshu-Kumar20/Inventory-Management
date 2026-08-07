@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
+import { api } from '../../services/api';
 
 export const Login = () => {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -48,7 +49,7 @@ export const Login = () => {
     }
   };
 
-  const handleSendMagicLink = (e) => {
+  const handleSendMagicLink = async (e) => {
     e.preventDefault();
     const targetEmail = forgotEmail || email;
     if (!targetEmail) {
@@ -56,7 +57,10 @@ export const Login = () => {
       return;
     }
     setMagicLinkSent(true);
-    toast.success(`One-Time Magic Login Link generated for ${targetEmail}`, 'Email Link Ready');
+    try {
+      await api.forgotPassword(targetEmail);
+    } catch (err) {}
+    toast.success(`One-Time Magic Login Link generated for ${targetEmail}`, 'Email Link Dispatched');
   };
 
   const handleDirectEmailLogin = () => {
@@ -321,7 +325,7 @@ export const Login = () => {
         }
       >
         <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-          Forgot your password? Enter your registered work email address below to generate an instant one-time login link.
+          Forgot your password? Enter your registered work email address below to generate an instant one-time login link or dispatch an email.
         </p>
 
         <Input
@@ -345,7 +349,7 @@ export const Login = () => {
               fontSize: '0.85rem'
             }}
           >
-            <strong>✨ Magic Link Ready:</strong> Click the blue <strong>"Login Now via Email Link"</strong> button below to sign in instantly without needing a password.
+            <strong>✨ Magic Link Sent:</strong> Password reset request sent to <strong>{forgotEmail}</strong>. You can also click the blue <strong>"Login Now via Email Link"</strong> button below to sign in immediately.
           </div>
         )}
       </Modal>

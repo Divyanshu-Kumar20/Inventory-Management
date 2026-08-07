@@ -31,6 +31,15 @@ export const api = {
     return res.json();
   },
 
+  forgotPassword: async (email) => {
+    const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ email })
+    });
+    return res.json();
+  },
+
   getProfile: async () => {
     const res = await fetch(`${BASE_URL}/auth/profile`, {
       headers: getHeaders()
