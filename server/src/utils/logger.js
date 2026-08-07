@@ -2,10 +2,7 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 
-const logDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -22,31 +19,42 @@ const consoleFormat = winston.format.combine(
   })
 );
 
+const transports = [
+  new winston.transports.Console({
+    format: consoleFormat
+  })
+];
+
+// File logging only for non-serverless local execution (Vercel filesystem is read-only)
+if (!isServerless) {
+  try {
+    const logDir = path.join(__dirname, '../../logs');
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(logDir, 'error.log'),
+        level: 'error',
+        maxsize: 5242880,
+        maxFiles: 5
+      }),
+      new winston.transports.File({
+        filename: path.join(logDir, 'combined.log'),
+        maxsize: 5242880,
+        maxFiles: 5
+      })
+    );
+  } catch (e) {
+    // Ignore file transport errors on serverless environments
+  }
+}
+
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: logFormat,
-  transports: [
-    new winston.transports.File({
-      filename: path.join(logDir, 'error.log'),
-      level: 'error',
-      maxsize: 5242880,
-      maxFiles: 5
-    }),
-    new winston.transports.File({
-      filename: path.join(logDir, 'combined.log'),
-      maxsize: 5242880,
-      maxFiles: 5
-    })
-  ]
+  transports
 });
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: consoleFormat
-    })
-  );
-}
 
 logger.stream = {
   write: (message) => {

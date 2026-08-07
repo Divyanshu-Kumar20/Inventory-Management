@@ -2,13 +2,17 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const uploadDir = isServerless ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
+
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[Upload Notice] File storage running in serverless temp directory');
 }
 
-// Storage Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -20,7 +24,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// File Filter (Image validation)
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   if (allowedTypes.includes(file.mimetype)) {
@@ -30,7 +33,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Multer Upload Middleware Instance (Max 5MB)
 const upload = multer({
   storage,
   fileFilter,
