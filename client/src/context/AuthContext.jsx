@@ -1,26 +1,32 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('inventra_user');
-    return savedUser ? JSON.parse(savedUser) : {
-      name: 'Alex Vance',
-      email: 'alex.vance@inventra.io',
-      role: 'Super Admin',
-      avatar: 'AV',
-      isAuthenticated: true
-    };
+    try {
+      const savedUser = localStorage.getItem('inventra_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.isAuthenticated) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading user session:', e);
+    }
+    return null; // Default to unauthenticated state so app always starts on /login page
   });
 
-  const login = (email, password) => {
+  const login = (email, password, extraData = {}) => {
+    const nameStr = extraData.name || email.split('@')[0].replace('.', ' ').toUpperCase();
     const newUser = {
-      name: email.split('@')[0].replace('.', ' ').toUpperCase(),
+      name: nameStr,
       email,
-      role: 'Super Admin',
-      avatar: email.substring(0, 2).toUpperCase(),
-      isAuthenticated: true
+      role: extraData.role || 'Super Admin',
+      avatar: nameStr.substring(0, 2).toUpperCase(),
+      isAuthenticated: true,
+      token: extraData.token || null
     };
     setUser(newUser);
     localStorage.setItem('inventra_user', JSON.stringify(newUser));
@@ -30,6 +36,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('inventra_user');
+    localStorage.removeItem('inventra_token');
   };
 
   return (

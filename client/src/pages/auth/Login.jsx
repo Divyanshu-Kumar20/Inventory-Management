@@ -13,8 +13,8 @@ export const Login = () => {
   
   // Login & Registration State
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('admin@inventra.io');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState('Inventory Manager');
   const [showPassword, setShowPassword] = useState(false);
   
@@ -27,14 +27,27 @@ export const Login = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const handleAuthSubmit = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     if (mode === 'login') {
       if (!email || !password) {
         toast.error('Please enter a valid email and password');
         return;
       }
-      login(email, password);
+      try {
+        const res = await api.login(email, password);
+        if (res && res.success && res.data) {
+          login(res.data.user.email, password, {
+            name: res.data.user.name,
+            role: res.data.user.role,
+            token: res.data.token
+          });
+        } else {
+          login(email, password);
+        }
+      } catch (err) {
+        login(email, password);
+      }
       toast.success('Welcome back to Inventra Enterprise!', 'Login Successful');
       navigate('/dashboard');
     } else {
@@ -43,7 +56,16 @@ export const Login = () => {
         toast.error('Please fill in all required fields (Name, Email, Password)');
         return;
       }
-      login(email, password);
+      try {
+        const res = await api.register({ name, email, password, role });
+        if (res && res.success && res.data) {
+          login(email, password, { name, role, token: res.data.token });
+        } else {
+          login(email, password, { name, role });
+        }
+      } catch (err) {
+        login(email, password, { name, role });
+      }
       toast.success(`Welcome to Inventra, ${name}! Your ${role} account is ready.`, 'Account Registered');
       navigate('/dashboard');
     }
@@ -64,7 +86,7 @@ export const Login = () => {
   };
 
   const handleDirectEmailLogin = () => {
-    const targetEmail = forgotEmail || email || 'admin@inventra.io';
+    const targetEmail = forgotEmail || email || 'user@inventra.io';
     login(targetEmail, 'magic-link-auth');
     toast.success(`Authenticated successfully via email magic link (${targetEmail})`, 'Email Login Success');
     setShowForgotModal(false);

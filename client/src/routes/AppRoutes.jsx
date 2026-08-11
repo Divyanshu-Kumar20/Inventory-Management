@@ -24,9 +24,14 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export const AppRoutes = () => {
+  const { user } = useAuth();
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={user && user.isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
 
       <Route
         path="/"
