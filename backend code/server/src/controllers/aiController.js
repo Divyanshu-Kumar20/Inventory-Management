@@ -1,5 +1,6 @@
 const aiService = require('../services/aiService');
 const asyncHandler = require('../utils/asyncHandler');
+const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
 const generateAIInsights = asyncHandler(async (req, res) => {
   const { prompt, context } = req.body;
@@ -40,9 +41,19 @@ const getInsights = asyncHandler(async (req, res) => {
   });
 });
 
+const seedHistory = asyncHandler(async (req, res) => {
+  const result = await seedHistoricalOrderDataset();
+  res.status(200).json({
+    success: true,
+    message: 'Historical sales dataset preparation completed',
+    data: result
+  });
+});
+
 module.exports = {
   generateAIInsights,
   chatAI,
   analyticsAI,
-  getInsights
+  getInsights,
+  seedHistory
 };
