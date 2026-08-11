@@ -1,11 +1,35 @@
-import React from 'react';
-import { User, Mail, Shield, Key, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Mail, Shield, Key, Clock, CheckCircle2, Lock, Save } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export const Profile = () => {
   const { user } = useAuth();
+  const toast = useToast();
+
+  const [currentPass, setCurrentPass] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+
+  const handleUpdatePassword = (e) => {
+    e.preventDefault();
+    if (!currentPass || !newPass) {
+      toast.error('Please enter current and new password');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    toast.success('Security password updated successfully', 'Password Updated');
+    setCurrentPass('');
+    setNewPass('');
+    setConfirmPass('');
+  };
 
   const activityLogs = [
     { id: 1, action: 'Updated Product Stock Level (MacBook Pro 16")', time: '15m ago', ip: '192.168.1.45' },
@@ -18,8 +42,8 @@ export const Profile = () => {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Administrator Profile</h1>
-          <p className="page-subtitle">User credentials, access levels, and security audit log.</p>
+          <h1 className="page-title">Administrator Profile & Security</h1>
+          <p className="page-subtitle">User credentials, password reset management, and security audit log.</p>
         </div>
       </div>
 
@@ -30,7 +54,7 @@ export const Profile = () => {
             {user?.avatar || 'AV'}
           </div>
           <h2 style={{ fontSize: '1.3rem', fontWeight: 800 }}>{user?.name || 'Alex Vance'}</h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{user?.email || 'alex.vance@inventra.io'}</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{user?.email || 'admin@inventra.io'}</p>
           
           <div style={{ marginTop: '1rem' }}>
             <Badge variant="success" icon={Shield}>{user?.role || 'Super Admin'}</Badge>
@@ -52,8 +76,49 @@ export const Profile = () => {
           </div>
         </Card>
 
-        {/* Right Column: Security Activity Audit Log */}
-        <div style={{ gridColumn: 'span 2' }}>
+        {/* Right Column: Password Reset & Audit Logs */}
+        <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Password Reset Section */}
+          <Card title="Reset & Update Security Password">
+            <form onSubmit={handleUpdatePassword} style={{ marginTop: '1rem' }}>
+              <div className="grid grid-cols-2">
+                <Input
+                  label="Current Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={currentPass}
+                  onChange={(e) => setCurrentPass(e.target.value)}
+                  icon={Lock}
+                  required
+                />
+                <Input
+                  label="New Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={newPass}
+                  onChange={(e) => setNewPass(e.target.value)}
+                  icon={Key}
+                  required
+                />
+              </div>
+              <Input
+                label="Confirm New Password"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                icon={Key}
+                required
+              />
+              <div style={{ marginTop: '1rem' }}>
+                <Button type="submit" variant="primary" icon={Save}>
+                  Save New Password
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          {/* Audit Logs Section */}
           <Card title="Security Audit & Activity Trail">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
               {activityLogs.map(log => (

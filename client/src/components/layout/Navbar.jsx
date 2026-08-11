@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Bell, Sun, Moon, Menu, User, Settings, LogOut, CheckCircle2, Check } from 'lucide-react';
+import { Search, Bell, Sun, Moon, Menu, User, Settings, LogOut, CheckCircle2, Key, Lock, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
+import { Modal } from '../common/Modal';
+import { Input } from '../common/Input';
+import { Button } from '../common/Button';
 
 export const Navbar = ({ toggleMobileSidebar }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Password Reset Form State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Low Stock Alert', desc: 'Herman Miller Aeron Chair is below threshold (4 left)', time: '10m ago', read: false },
-    { id: 2, title: 'New Order Received', desc: 'Order #ORD-8941 placed by Apex Corp ($3,247.50)', time: '45m ago', read: false },
+    { id: 2, title: 'New Order Received', desc: 'Order #ORD-8941 placed by Apex Corp (₹3,247.50)', time: '45m ago', read: false },
     { id: 3, title: 'Product Added', desc: 'Keychron K2 Mechanical Keyboard restocked', time: '2h ago', read: false }
   ]);
 
@@ -38,6 +48,23 @@ export const Navbar = ({ toggleMobileSidebar }) => {
     logout();
     toast.info('Logged out successfully');
     navigate('/login');
+  };
+
+  const handleResetPasswordSubmit = (e) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) {
+      toast.error('Please fill in current and new password');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    toast.success('Account password updated securely', 'Password Reset');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowResetPasswordModal(false);
   };
 
   return (
@@ -158,7 +185,7 @@ export const Navbar = ({ toggleMobileSidebar }) => {
                 position: 'absolute',
                 right: 0,
                 top: '54px',
-                width: '200px',
+                width: '220px',
                 zIndex: 100,
                 padding: '0.5rem'
               }}
@@ -171,13 +198,24 @@ export const Navbar = ({ toggleMobileSidebar }) => {
               >
                 <User size={16} /> My Profile
               </Link>
+              <button
+                type="button"
+                className="nav-item w-full"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  setShowResetPasswordModal(true);
+                }}
+                style={{ color: 'var(--text-main)', border: 'none', background: 'transparent', textAlign: 'left' }}
+              >
+                <Key size={16} /> Reset Password
+              </button>
               <Link
                 to="/settings"
                 className="nav-item"
                 onClick={() => setShowProfileMenu(false)}
                 style={{ color: 'var(--text-main)' }}
               >
-                <Settings size={16} /> Settings
+                <Settings size={16} /> System Settings
               </Link>
               <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.35rem 0' }} />
               <button
@@ -191,6 +229,55 @@ export const Navbar = ({ toggleMobileSidebar }) => {
           )}
         </div>
       </div>
+
+      {/* Password Reset Modal from Profile Menu */}
+      <Modal
+        isOpen={showResetPasswordModal}
+        onClose={() => setShowResetPasswordModal(false)}
+        title="Reset Account Password"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setShowResetPasswordModal(false)}>Cancel</Button>
+            <Button variant="primary" icon={Save} onClick={handleResetPasswordSubmit}>
+              Update Password
+            </Button>
+          </>
+        }
+      >
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+          Change security password for <strong>{user?.email || 'admin@inventra.io'}</strong>.
+        </p>
+
+        <form onSubmit={handleResetPasswordSubmit}>
+          <Input
+            label="Current Password"
+            type="password"
+            placeholder="••••••••"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            icon={Lock}
+            required
+          />
+          <Input
+            label="New Security Password"
+            type="password"
+            placeholder="••••••••"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            icon={Key}
+            required
+          />
+          <Input
+            label="Confirm New Password"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            icon={Key}
+            required
+          />
+        </form>
+      </Modal>
     </header>
   );
 };
