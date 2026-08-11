@@ -2,6 +2,7 @@ const aiService = require('../services/aiService');
 const forecastService = require('../services/forecastService');
 const stockoutService = require('../services/stockoutService');
 const restockService = require('../services/restockService');
+const anomalyService = require('../services/anomalyService');
 const asyncHandler = require('../utils/asyncHandler');
 const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
@@ -72,6 +73,15 @@ const getRestockRecommendations = asyncHandler(async (req, res) => {
   });
 });
 
+const getAnomalies = asyncHandler(async (req, res) => {
+  const result = await anomalyService.detectAnomalies();
+  res.status(200).json({
+    success: true,
+    message: 'Statistical Anomaly Detection scan completed',
+    data: result
+  });
+});
+
 const seedHistory = asyncHandler(async (req, res) => {
   const result = await seedHistoricalOrderDataset();
   res.status(200).json({
@@ -89,5 +99,6 @@ module.exports = {
   getForecast,
   getStockoutRisk,
   getRestockRecommendations,
+  getAnomalies,
   seedHistory
 };
