@@ -1,5 +1,6 @@
 const aiService = require('../services/aiService');
 const forecastService = require('../services/forecastService');
+const stockoutService = require('../services/stockoutService');
 const asyncHandler = require('../utils/asyncHandler');
 const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
@@ -52,6 +53,15 @@ const getForecast = asyncHandler(async (req, res) => {
   });
 });
 
+const getStockoutRisk = asyncHandler(async (req, res) => {
+  const result = await stockoutService.predictStockoutRisk();
+  res.status(200).json({
+    success: true,
+    message: 'AI Stockout Risk evaluation completed',
+    data: result
+  });
+});
+
 const seedHistory = asyncHandler(async (req, res) => {
   const result = await seedHistoricalOrderDataset();
   res.status(200).json({
@@ -67,5 +77,6 @@ module.exports = {
   analyticsAI,
   getInsights,
   getForecast,
+  getStockoutRisk,
   seedHistory
 };
