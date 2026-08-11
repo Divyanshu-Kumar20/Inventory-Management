@@ -7,7 +7,8 @@ import {
   PieChart as PieIcon,
   DollarSign,
   Users,
-  Boxes
+  Boxes,
+  Info
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -30,11 +31,12 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { exportToCSV } from '../../utils/exportUtils';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { mockApi } from '../../services/mockApi';
 
-// --- Datasets --- //
+// --- Datasets for Demo Admin Account --- //
 
-// Sales Datasets
-const monthlySalesData = [
+const DEMO_monthlySalesData = [
   { month: 'Jan', revenue: 68000, expenses: 42000, profit: 26000 },
   { month: 'Feb', revenue: 59000, expenses: 38000, profit: 21000 },
   { month: 'Mar', revenue: 84000, expenses: 51000, profit: 33000 },
@@ -44,7 +46,7 @@ const monthlySalesData = [
   { month: 'Jul', revenue: 128450, expenses: 74000, profit: 54450 }
 ];
 
-const topProductsData = [
+const DEMO_topProductsData = [
   { name: 'MacBook Pro 16"', sales: 42 },
   { name: 'Dell 27" Monitor', sales: 38 },
   { name: 'Logitech MX 3S', sales: 65 },
@@ -52,15 +54,14 @@ const topProductsData = [
   { name: 'Sony Headphones', sales: 29 }
 ];
 
-const categorySalesData = [
+const DEMO_categorySalesData = [
   { name: 'Electronics', value: 58, color: '#2563EB' },
   { name: 'Furniture', value: 22, color: '#7C3AED' },
   { name: 'Appliances', value: 12, color: '#0EA5E9' },
   { name: 'Stationery', value: 8, color: '#22C55E' }
 ];
 
-// Inventory Datasets
-const categoryStockData = [
+const DEMO_categoryStockData = [
   { category: 'Electronics', units: 133, valuation: 145000 },
   { category: 'Furniture', units: 4, valuation: 5580 },
   { category: 'Appliances', units: 25, valuation: 4225 },
@@ -68,13 +69,13 @@ const categoryStockData = [
   { category: 'Apparel', units: 0, valuation: 0 }
 ];
 
-const stockHealthData = [
+const DEMO_stockHealthData = [
   { name: 'In Stock (Healthy)', value: 72, color: '#22C55E' },
   { name: 'Low Stock Alert', value: 18, color: '#F59E0B' },
   { name: 'Out of Stock', value: 10, color: '#EF4444' }
 ];
 
-const inventoryTurnoverData = [
+const DEMO_inventoryTurnoverData = [
   { month: 'Jan', ratio: 3.2, dio: 45 },
   { month: 'Feb', ratio: 3.5, dio: 42 },
   { month: 'Mar', ratio: 4.1, dio: 36 },
@@ -84,14 +85,13 @@ const inventoryTurnoverData = [
   { month: 'Jul', ratio: 5.8, dio: 25 }
 ];
 
-// Revenue Datasets
-const revenueChannelData = [
+const DEMO_revenueChannelData = [
   { name: 'Credit Card', value: 54, color: '#2563EB' },
   { name: 'Wire Transfer', value: 32, color: '#7C3AED' },
   { name: 'PayPal', value: 14, color: '#0EA5E9' }
 ];
 
-const aovData = [
+const DEMO_aovData = [
   { month: 'Jan', aov: 420 },
   { month: 'Feb', aov: 480 },
   { month: 'Mar', aov: 610 },
@@ -101,15 +101,14 @@ const aovData = [
   { month: 'Jul', aov: 950 }
 ];
 
-const targetVsActualData = [
+const DEMO_targetVsActualData = [
   { quarter: 'Q1 2026', target: 200000, actual: 211000 },
   { quarter: 'Q2 2026', target: 250000, actual: 289000 },
   { quarter: 'Q3 2026 (Est)', target: 300000, actual: 342000 },
   { quarter: 'Q4 2026 (Target)', target: 350000, actual: 0 }
 ];
 
-// Customer Datasets
-const customerAcquisitionData = [
+const DEMO_customerAcquisitionData = [
   { month: 'Jan', newCustomers: 32, totalActive: 410 },
   { month: 'Feb', newCustomers: 28, totalActive: 438 },
   { month: 'Mar', newCustomers: 45, totalActive: 483 },
@@ -119,7 +118,7 @@ const customerAcquisitionData = [
   { month: 'Jul', newCustomers: 82, totalActive: 726 }
 ];
 
-const topClientsData = [
+const DEMO_topClientsData = [
   { name: 'Apex Corp', spend: 28450 },
   { name: 'Nexus Labs', spend: 16920 },
   { name: 'Vanguard Systems', spend: 9400 },
@@ -127,15 +126,55 @@ const topClientsData = [
   { name: 'Elevate Solutions', spend: 114 }
 ];
 
-const customerRetentionData = [
+const DEMO_customerRetentionData = [
   { name: 'Repeat / Retained', value: 84, color: '#22C55E' },
   { name: 'New Clients', value: 12, color: '#2563EB' },
   { name: 'Churned / Inactive', value: 4, color: '#EF4444' }
 ];
 
+// --- Zero Datasets for New Accounts --- //
+const ZERO_months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+
+const ZERO_monthlySalesData = ZERO_months.map(m => ({ month: m, revenue: 0, expenses: 0, profit: 0 }));
+const ZERO_inventoryTurnoverData = ZERO_months.map(m => ({ month: m, ratio: 0, dio: 0 }));
+const ZERO_aovData = ZERO_months.map(m => ({ month: m, aov: 0 }));
+const ZERO_targetVsActualData = [
+  { quarter: 'Q1 2026', target: 0, actual: 0 },
+  { quarter: 'Q2 2026', target: 0, actual: 0 },
+  { quarter: 'Q3 2026', target: 0, actual: 0 },
+  { quarter: 'Q4 2026', target: 0, actual: 0 }
+];
+const ZERO_customerAcquisitionData = ZERO_months.map(m => ({ month: m, newCustomers: 0, totalActive: 0 }));
+
 export const Reports = () => {
   const [reportType, setReportType] = useState('sales'); // 'sales' | 'inventory' | 'revenue' | 'customer'
+  const { user } = useAuth();
   const toast = useToast();
+
+  const isDemoAdmin = user?.email === 'admin@inventra.io' || user?.email === 'alex.vance@inventra.io';
+
+  // Dynamic Datasets selection based on user account
+  const monthlySalesData = isDemoAdmin ? DEMO_monthlySalesData : ZERO_monthlySalesData;
+  const topProductsData = isDemoAdmin ? DEMO_topProductsData : [];
+  const categorySalesData = isDemoAdmin ? DEMO_categorySalesData : [];
+  const categoryStockData = isDemoAdmin ? DEMO_categoryStockData : [
+    { category: 'Electronics', units: 0, valuation: 0 },
+    { category: 'Furniture', units: 0, valuation: 0 },
+    { category: 'Appliances', units: 0, valuation: 0 },
+    { category: 'Stationery', units: 0, valuation: 0 }
+  ];
+  const stockHealthData = isDemoAdmin ? DEMO_stockHealthData : [
+    { name: 'In Stock (Healthy)', value: 0, color: '#22C55E' },
+    { name: 'Low Stock Alert', value: 0, color: '#F59E0B' },
+    { name: 'Out of Stock', value: 0, color: '#EF4444' }
+  ];
+  const inventoryTurnoverData = isDemoAdmin ? DEMO_inventoryTurnoverData : ZERO_inventoryTurnoverData;
+  const revenueChannelData = isDemoAdmin ? DEMO_revenueChannelData : [];
+  const aovData = isDemoAdmin ? DEMO_aovData : ZERO_aovData;
+  const targetVsActualData = isDemoAdmin ? DEMO_targetVsActualData : ZERO_targetVsActualData;
+  const customerAcquisitionData = isDemoAdmin ? DEMO_customerAcquisitionData : ZERO_customerAcquisitionData;
+  const topClientsData = isDemoAdmin ? DEMO_topClientsData : [];
+  const customerRetentionData = isDemoAdmin ? DEMO_customerRetentionData : [];
 
   const handleDownloadPDF = () => {
     toast.success(`Generated official PDF report for ${reportType.toUpperCase()} module`, 'PDF Exported');
@@ -168,6 +207,29 @@ export const Reports = () => {
           </Button>
         </div>
       </div>
+
+      {/* Zero State Info Banner for New Accounts */}
+      {!isDemoAdmin && (
+        <div
+          style={{
+            padding: '0.875rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            background: 'rgba(79, 70, 229, 0.12)',
+            border: '1px solid rgba(99, 102, 241, 0.3)',
+            color: '#818CF8',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          <Info size={20} />
+          <div>
+            <strong>Clean Workspace Report Mode:</strong> All chart metrics, sales volume, and customer lifetime spend are initialized at <strong>₹0 (Zero)</strong> for this newly registered workspace. Chart metrics will dynamically populate as you create sales orders and add inventory.
+          </div>
+        </div>
+      )}
 
       {/* Report Selector Cards */}
       <div className="grid grid-cols-4" style={{ marginBottom: '1.5rem' }}>
@@ -278,7 +340,7 @@ export const Reports = () => {
                   <BarChart data={monthlySalesData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                     <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
-                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v / 1000}k`} />
+                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v}`} />
                     <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
                     <Legend />
                     <Bar dataKey="revenue" name="Revenue" fill="#2563EB" radius={[4, 4, 0, 0]} />
@@ -294,7 +356,7 @@ export const Reports = () => {
                   <LineChart data={monthlySalesData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                     <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} />
-                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v / 1000}k`} />
+                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v}`} />
                     <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
                     <Line type="monotone" dataKey="profit" name="Net Profit" stroke="#22C55E" strokeWidth={3} dot={{ r: 5 }} />
                   </LineChart>
@@ -306,31 +368,43 @@ export const Reports = () => {
           <div className="grid grid-cols-2">
             <Card title="Top Selling Products by Volume">
               <div style={{ width: '100%', height: 260, marginTop: '1rem' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart layout="vertical" data={topProductsData}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border-color)" />
-                    <XAxis type="number" stroke="var(--text-muted)" fontSize={12} />
-                    <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={12} width={110} />
-                    <Tooltip />
-                    <Bar dataKey="sales" name="Units Sold" fill="#7C3AED" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {topProductsData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart layout="vertical" data={topProductsData}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border-color)" />
+                      <XAxis type="number" stroke="var(--text-muted)" fontSize={12} />
+                      <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={12} width={110} />
+                      <Tooltip />
+                      <Bar dataKey="sales" name="Units Sold" fill="#7C3AED" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    0 Sales Volume recorded for this workspace
+                  </div>
+                )}
               </div>
             </Card>
 
             <Card title="Category Revenue Share (%)">
               <div style={{ width: '100%', height: 260, marginTop: '1rem' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categorySalesData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
-                      {categorySalesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(val) => `${val}%`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {categorySalesData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={categorySalesData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                        {categorySalesData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(val) => `${val}%`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    0% Category Revenue Share
+                  </div>
+                )}
               </div>
             </Card>
           </div>
@@ -400,7 +474,7 @@ export const Reports = () => {
                   <BarChart data={targetVsActualData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                     <XAxis dataKey="quarter" stroke="var(--text-muted)" fontSize={12} />
-                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v / 1000}k`} />
+                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v}`} />
                     <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
                     <Legend />
                     <Bar dataKey="target" name="Target Revenue" fill="#94A3B8" radius={[4, 4, 0, 0]} />
@@ -412,17 +486,23 @@ export const Reports = () => {
 
             <Card title="Revenue Payment Channel Breakdown (%)">
               <div style={{ width: '100%', height: 300, marginTop: '1rem' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={revenueChannelData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
-                      {revenueChannelData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(val) => `${val}%`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {revenueChannelData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={revenueChannelData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                        {revenueChannelData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(val) => `${val}%`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    0 Revenue Channels recorded
+                  </div>
+                )}
               </div>
             </Card>
           </div>
@@ -469,32 +549,44 @@ export const Reports = () => {
 
             <Card title="Client Retention & Renewal Ratio (%)">
               <div style={{ width: '100%', height: 300, marginTop: '1rem' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={customerRetentionData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
-                      {customerRetentionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(val) => `${val}%`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {customerRetentionData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={customerRetentionData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                        {customerRetentionData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(val) => `${val}%`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    0 Retention Data recorded
+                  </div>
+                )}
               </div>
             </Card>
           </div>
 
           <Card title="Top Enterprise Clients by Lifetime Spend (₹)">
             <div style={{ width: '100%', height: 260, marginTop: '1rem' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart layout="vertical" data={topClientsData}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border-color)" />
-                  <XAxis type="number" stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v / 1000}k`} />
-                  <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={12} width={130} />
-                  <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
-                  <Bar dataKey="spend" name="Lifetime Spend (₹)" fill="#2563EB" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {topClientsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart layout="vertical" data={topClientsData}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border-color)" />
+                    <XAxis type="number" stroke="var(--text-muted)" fontSize={12} tickFormatter={(v) => `₹${v}`} />
+                    <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={12} width={130} />
+                    <Tooltip formatter={(val) => `₹${val.toLocaleString()}`} />
+                    <Bar dataKey="spend" name="Lifetime Spend (₹)" fill="#2563EB" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                  ₹0 Lifetime Client Spend
+                </div>
+              )}
             </div>
           </Card>
         </>
