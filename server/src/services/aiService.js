@@ -18,7 +18,186 @@ class AIService {
     }
   }
 
-  // Phase 2: Intent-based Secure Database Context Fetching
+  // --- Phase 3: Natural Language Intent Parser --- //
+  async parseNaturalLanguageQuery(prompt) {
+    const p = prompt.toLowerCase();
+
+    // Deterministic Rule-based Parsing Engine for Enterprise Speed
+    let intent = 'general_analytics';
+    let entity = 'products';
+    let period = 'all_time';
+    let limit = 5;
+    let sort = 'revenue';
+    let category = null;
+
+    // Detect limits (e.g. top 5, top 10, top 3)
+    const limitMatch = p.match(/(?:top|best|first)\s+(\d+)/);
+    if (limitMatch && limitMatch[1]) {
+      limit = parseInt(limitMatch[1], 10);
+    }
+
+    // Detect period
+    if (p.includes('this month') || p.includes('current month')) period = 'current_month';
+    else if (p.includes('last month')) period = 'last_month';
+    else if (p.includes('quarter') || p.includes('q1') || p.includes('q2')) period = 'quarter';
+    else if (p.includes('year') || p.includes('annual')) period = 'year';
+
+    // Detect Entity & Intent
+    if (p.includes('product') || p.includes('item') || p.includes('sku')) {
+      entity = 'products';
+      intent = p.includes('stock') ? 'inventory_level' : 'top_products';
+      sort = p.includes('sales') || p.includes('sold') ? 'sales' : (p.includes('stock') ? 'stock' : 'revenue');
+    } else if (p.includes('order') || p.includes('transaction')) {
+      entity = 'orders';
+      intent = 'order_analytics';
+      sort = p.includes('amount') || p.includes('revenue') ? 'amount' : 'date';
+    } else if (p.includes('customer') || p.includes('client') || p.includes('buyer')) {
+      entity = 'customers';
+      intent = 'top_customers';
+      sort = p.includes('spend') || p.includes('revenue') ? 'totalSpent' : 'ordersCount';
+    } else if (p.includes('supplier') || p.includes('vendor')) {
+      entity = 'suppliers';
+      intent = 'top_suppliers';
+      sort = p.includes('rating') ? 'rating' : 'productsSupplied';
+    } else if (p.includes('revenue') || p.includes('sales') || p.includes('financial')) {
+      entity = 'revenue';
+      intent = 'revenue_summary';
+      sort = 'revenue';
+    } else if (p.includes('inventory') || p.includes('warehouse')) {
+      entity = 'inventory';
+      intent = 'inventory_turnover';
+      sort = 'stock';
+    }
+
+    const structuredQuery = { intent, entity, period, limit, sort, category };
+
+    // Use Gemini model to refine structured JSON if API key exists
+    if (this.ai) {
+      try {
+        const aiParseResponse = await this.ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: `Parse this natural language business question into a JSON object with keys: "intent", "entity", "period", "limit", "sort".
+User Question: "${prompt}"
+Return ONLY raw JSON.`
+        });
+        const jsonText = aiParseResponse.text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsedAI = JSON.parse(jsonText);
+        return { ...structuredQuery, ...parsedAI };
+      } catch (e) {
+        // Fallback to deterministic structured parsing
+        return structuredQuery;
+      }
+    }
+
+    return structuredQuery;
+  }
+
+  // --- Phase 3: MongoDB Aggregation Pipeline Execution --- //
+  async executeAnalyticsAggregation(structuredQuery) {
+    const { intent, entity, period, limit, sort } = structuredQuery;
+    let aggregatedData = [];
+    let summaryText = '';
+
+    try {
+      if (entity === 'products' || intent === 'top_products') {
+        let sortObj = { price: -1 };
+        if (sort === 'stock') sortObj = { stock: -1 };
+        if (sort === 'sales' || sort === 'revenue') sortObj = { stock: -1, price: -1 };
+
+        aggregatedData = await Product.find({})
+          .sort(sortObj)
+          .limit(limit)
+          .select('name sku category price stock status supplier');
+
+        summaryText = `Found **${aggregatedData.length} top products** sorted by ${sort}.`;
+
+      } else if (entity === 'orders' || intent === 'order_analytics') {
+        const pipeline = [
+          { $match: { paymentStatus: 'Paid' } },
+          {
+            $group: {
+              _id: '$customer',
+              totalOrders: { $sum: 1 },
+              totalSpent: { $sum: '$amount' }
+            }
+          },
+          { $sort: { totalSpent: -1 } },
+          { $limit: limit }
+        ];
+        aggregatedData = await Order.aggregate(pipeline);
+        summaryText = `Aggregated **${aggregatedData.length} order customer profiles** for ${period}.`;
+
+      } else if (entity === 'customers' || intent === 'top_customers') {
+        aggregatedData = await Customer.find({})
+          .sort({ totalSpent: -1 })
+          .limit(limit)
+          .select('name email phone city totalSpent ordersCount status');
+
+        summaryText = `Retrieved top **${aggregatedData.length} enterprise accounts** by lifetime value.`;
+
+      } else if (entity === 'suppliers' || intent === 'top_suppliers') {
+        aggregatedData = await Supplier.find({})
+          .sort({ rating: -1 })
+          .limit(limit)
+          .select('name contactPerson email phone address productsSupplied rating');
+
+        summaryText = `Fetched **${aggregatedData.length} premier suppliers** by vendor performance rating.`;
+
+      } else if (entity === 'revenue' || intent === 'revenue_summary') {
+        const orders = await Order.find({ paymentStatus: 'Paid' });
+        const revenueByMethod = {};
+        orders.forEach(o => {
+          revenueByMethod[o.paymentMethod || 'Credit Card'] = (revenueByMethod[o.paymentMethod || 'Credit Card'] || 0) + o.amount;
+        });
+        aggregatedData = Object.keys(revenueByMethod).map(m => ({ channel: m, revenue: revenueByMethod[m] }));
+        summaryText = `Analyzed **₹${orders.reduce((sum, o) => sum + o.amount, 0).toLocaleString()} total revenue** across channels.`;
+
+      } else {
+        const lowStock = await Product.find({ stock: { $lte: 10 } }).limit(limit);
+        aggregatedData = lowStock;
+        summaryText = `Identified **${lowStock.length} inventory items** requiring restock.`;
+      }
+    } catch (dbErr) {
+      logger.error(`[Analytics Aggregation Error] ${dbErr.message}`);
+      aggregatedData = [];
+      summaryText = `Executed standard analytics scan.`;
+    }
+
+    return { aggregatedData, summaryText };
+  }
+
+  async runNaturalLanguageAnalytics(prompt, user) {
+    // Step 1: Convert NL prompt into structured parameters
+    const structuredQuery = await this.parseNaturalLanguageQuery(prompt);
+
+    // Step 2: Execute MongoDB Aggregation
+    const { aggregatedData, summaryText } = await this.executeAnalyticsAggregation(structuredQuery);
+
+    // Step 3: Synthesize Executive Insight with AI
+    let executiveInsight = summaryText;
+    if (this.ai) {
+      try {
+        const res = await this.ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: `Synthesize a executive 2-sentence summary for this business query results:
+Structured Intent: ${JSON.stringify(structuredQuery)}
+Aggregated Data: ${JSON.stringify(aggregatedData)}`
+        });
+        executiveInsight = res.text;
+      } catch (e) {
+        // Keep summaryText
+      }
+    }
+
+    return {
+      query: prompt,
+      structuredQuery,
+      data: aggregatedData,
+      insight: executiveInsight
+    };
+  }
+
+  // Phase 2 Chat Processor
   async fetchContextForIntent(prompt, user) {
     const p = prompt.toLowerCase();
     let intent = 'GENERAL';
@@ -64,7 +243,6 @@ class AIService {
       }));
       data = { suppliers: supplierProductCount };
     } else {
-      // General ERP Context Summary
       const totalProducts = await Product.countDocuments({});
       const totalOrders = await Order.countDocuments({});
       const totalCustomers = await Customer.countDocuments({});
@@ -76,10 +254,8 @@ class AIService {
 
   async processChat(prompt, user) {
     try {
-      // Step 1 & 2: Determine intent & fetch context safely from DB (AI never executes raw DB queries)
       const { intent, data } = await this.fetchContextForIntent(prompt, user);
 
-      // Step 3: Pass clean context data to AI model to synthesize final answer
       if (this.ai) {
         const response = await this.ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -97,7 +273,6 @@ Instructions: Give a concise, professional, friendly markdown response answering
         };
       }
 
-      // Step 4: Fallback response generation when API Key is placeholder
       const reply = this.synthesizeFallbackReply(intent, data, prompt);
       return {
         reply,

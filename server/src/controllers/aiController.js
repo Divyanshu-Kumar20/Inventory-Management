@@ -21,7 +21,18 @@ const chatAI = asyncHandler(async (req, res) => {
   });
 });
 
+const analyticsAI = asyncHandler(async (req, res) => {
+  const { prompt } = req.body;
+  const result = await aiService.runNaturalLanguageAnalytics(prompt, req.user);
+  res.status(200).json({
+    success: true,
+    message: 'Natural Language Analytics query executed',
+    data: result
+  });
+});
+
 module.exports = {
   generateAIInsights,
-  chatAI
+  chatAI,
+  analyticsAI
 };

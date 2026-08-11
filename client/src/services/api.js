@@ -47,9 +47,18 @@ export const api = {
     return res.json();
   },
 
-  // AI Assistant API
+  // AI Assistant & Natural Language Analytics API
   aiChat: async (prompt) => {
     const res = await fetch(`${BASE_URL}/ai/chat`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ prompt })
+    });
+    return res.json();
+  },
+
+  aiAnalytics: async (prompt) => {
+    const res = await fetch(`${BASE_URL}/ai/analytics`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ prompt })
