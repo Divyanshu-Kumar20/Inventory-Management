@@ -47,6 +47,16 @@ export const api = {
     return res.json();
   },
 
+  // AI Assistant API
+  aiChat: async (prompt) => {
+    const res = await fetch(`${BASE_URL}/ai/chat`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ prompt })
+    });
+    return res.json();
+  },
+
   // Products API
   getProducts: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
