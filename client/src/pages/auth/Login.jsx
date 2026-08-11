@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Boxes, Lock, Mail, ArrowRight, Eye, EyeOff, Send, LogIn, User, UserPlus, Shield } from 'lucide-react';
+import { Boxes, Lock, Mail, ArrowRight, Eye, EyeOff, Send, LogIn, User, UserPlus, Shield, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Input } from '../../components/common/Input';
@@ -13,8 +13,8 @@ export const Login = () => {
   
   // Login & Registration State
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@inventra.io');
+  const [password, setPassword] = useState('password123');
   const [role, setRole] = useState('Inventory Manager');
   const [showPassword, setShowPassword] = useState(false);
   
@@ -26,6 +26,13 @@ export const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+
+  const handleFillDemoAdmin = () => {
+    setEmail('admin@inventra.io');
+    setPassword('password123');
+    setMode('login');
+    toast.success('Pre-loaded Enterprise Admin credentials filled (admin@inventra.io)', 'Demo Account Selected');
+  };
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -86,7 +93,7 @@ export const Login = () => {
   };
 
   const handleDirectEmailLogin = () => {
-    const targetEmail = forgotEmail || email || 'user@inventra.io';
+    const targetEmail = forgotEmail || email || 'admin@inventra.io';
     login(targetEmail, 'magic-link-auth');
     toast.success(`Authenticated successfully via email magic link (${targetEmail})`, 'Email Login Success');
     setShowForgotModal(false);
@@ -133,7 +140,7 @@ export const Login = () => {
           position: 'relative'
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <div
             style={{
               width: '54px',
@@ -157,6 +164,49 @@ export const Login = () => {
               : 'Create your enterprise workspace account'}
           </p>
         </div>
+
+        {/* Pre-loaded Demo Account Quick-Fill Card */}
+        {mode === 'login' && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(79, 70, 229, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.75rem'
+            }}
+          >
+            <div style={{ fontSize: '0.775rem' }}>
+              <div style={{ fontWeight: 700, color: '#818CF8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <Zap size={14} /> Pre-loaded Demo Account
+              </div>
+              <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
+                Pre-filled with Products, Orders & Customers
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleFillDemoAdmin}
+              style={{
+                padding: '0.35rem 0.65rem',
+                borderRadius: '6px',
+                border: 'none',
+                background: '#4F46E5',
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Fill Demo
+            </button>
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div
@@ -185,7 +235,7 @@ export const Login = () => {
               transition: 'all 0.2s ease'
             }}
           >
-            Sign In
+            Sign In (Demo)
           </button>
           <button
             type="button"
@@ -224,7 +274,7 @@ export const Login = () => {
           <Input
             label="Work Email"
             type="email"
-            placeholder="user@inventra.io"
+            placeholder="admin@inventra.io"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={Mail}
