@@ -100,11 +100,11 @@ const INITIAL_PRODUCTS = [
 ];
 
 const INITIAL_CATEGORIES = [
-  { id: 'CAT-1', name: 'Electronics', description: 'Computers, accessories, audio gear & monitors', productsCount: 5, icon: 'Laptop' },
-  { id: 'CAT-2', name: 'Furniture', description: 'Ergonomic desks, executive chairs & office decor', productsCount: 1, icon: 'Armchair' },
-  { id: 'CAT-3', name: 'Appliances', description: 'Coffee makers, climate control & breakroom appliances', productsCount: 1, icon: 'Coffee' },
-  { id: 'CAT-4', name: 'Stationery', description: 'Notebooks, pens, filing organization & paper supplies', productsCount: 1, icon: 'BookOpen' },
-  { id: 'CAT-5', name: 'Apparel', description: 'Branded corporate apparel, jackets & uniforms', productsCount: 0, icon: 'Shirt' }
+  { id: 'CAT-1', name: 'Electronics', description: 'Computers, accessories, audio gear & monitors', icon: 'Laptop' },
+  { id: 'CAT-2', name: 'Furniture', description: 'Ergonomic desks, executive chairs & office decor', icon: 'Armchair' },
+  { id: 'CAT-3', name: 'Appliances', description: 'Coffee makers, climate control & breakroom appliances', icon: 'Coffee' },
+  { id: 'CAT-4', name: 'Stationery', description: 'Notebooks, pens, filing organization & paper supplies', icon: 'BookOpen' },
+  { id: 'CAT-5', name: 'Apparel', description: 'Branded corporate apparel, jackets & uniforms', icon: 'Shirt' }
 ];
 
 const INITIAL_ORDERS = [
@@ -225,7 +225,7 @@ const getStored = (key, fallback) => {
     const data = localStorage.getItem(tenantKey);
     if (data) return JSON.parse(data);
 
-    // If new registered tenant, start with ZERO (0) for Products, Inventory, Suppliers, Reports, Orders, & Customers
+    // If new registered tenant, start with ZERO (0) for Categories, Products, Inventory, Suppliers, Reports, Orders, & Customers
     const isDemoAdmin = getCurrentTenantKey() === 'demo_admin';
     if (!isDemoAdmin) {
       if (key === 'inventra_products') return [];
@@ -254,7 +254,14 @@ export const mockApi = {
   getProducts: () => getStored('inventra_products', INITIAL_PRODUCTS),
   saveProducts: (products) => setStored('inventra_products', products),
 
-  getCategories: () => getStored('inventra_categories', INITIAL_CATEGORIES),
+  getCategories: () => {
+    const rawCategories = getStored('inventra_categories', INITIAL_CATEGORIES);
+    const products = mockApi.getProducts();
+    return rawCategories.map(cat => ({
+      ...cat,
+      productsCount: products.filter(p => p.category && p.category.toLowerCase() === cat.name.toLowerCase()).length
+    }));
+  },
   saveCategories: (categories) => setStored('inventra_categories', categories),
 
   getOrders: () => getStored('inventra_orders', INITIAL_ORDERS),
