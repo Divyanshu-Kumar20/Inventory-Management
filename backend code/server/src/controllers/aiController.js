@@ -31,8 +31,18 @@ const analyticsAI = asyncHandler(async (req, res) => {
   });
 });
 
+const getInsights = asyncHandler(async (req, res) => {
+  const result = await aiService.getBusinessInsights(req.user);
+  res.status(200).json({
+    success: true,
+    message: 'AI Business Insights generated',
+    data: result
+  });
+});
+
 module.exports = {
   generateAIInsights,
   chatAI,
-  analyticsAI
+  analyticsAI,
+  getInsights
 };
