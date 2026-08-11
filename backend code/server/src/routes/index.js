@@ -13,8 +13,8 @@ const inventoryRoutes = require('./inventoryRoutes');
 const reportsRoutes = require('./reportsRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const uploadRoutes = require('./uploadRoutes');
+const aiRoutes = require('./aiRoutes');
 
-// Health Check Route (Phase 28 Deployment Health Verification)
 router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'online',
@@ -24,11 +24,9 @@ router.get('/health', (req, res) => {
   });
 });
 
-// Security Rate Limiting (Phase 25)
 router.use('/auth', authLimiter, authRoutes);
 router.use(apiLimiter);
 
-// Enterprise Resource API Routes
 router.use('/products', productRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/suppliers', supplierRoutes);
@@ -38,5 +36,6 @@ router.use('/inventory', inventoryRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/ai', aiRoutes);
 
 module.exports = router;

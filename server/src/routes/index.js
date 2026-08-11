@@ -13,6 +13,7 @@ const inventoryRoutes = require('./inventoryRoutes');
 const reportsRoutes = require('./reportsRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const uploadRoutes = require('./uploadRoutes');
+const aiRoutes = require('./aiRoutes');
 
 router.get('/health', (req, res) => {
   res.status(200).json({
@@ -35,5 +36,6 @@ router.use('/inventory', inventoryRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/ai', aiRoutes);
 
 module.exports = router;
