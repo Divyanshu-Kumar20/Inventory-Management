@@ -47,7 +47,7 @@ export const api = {
     return res.json();
   },
 
-  // AI Assistant, Demand Forecasting, Stockout, Smart Restocking & Anomaly Detection API
+  // AI Assistant, Demand Forecasting, Stockout, Smart Restocking, Anomaly & Recommendations API
   getAIInsights: async () => {
     const res = await fetch(`${BASE_URL}/ai/insights`, {
       headers: getHeaders()
@@ -78,6 +78,13 @@ export const api = {
 
   getAnomalies: async () => {
     const res = await fetch(`${BASE_URL}/ai/anomalies`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  getRecommendations: async () => {
+    const res = await fetch(`${BASE_URL}/ai/recommendations`, {
       headers: getHeaders()
     });
     return res.json();

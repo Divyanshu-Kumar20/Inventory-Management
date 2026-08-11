@@ -3,6 +3,7 @@ const forecastService = require('../services/forecastService');
 const stockoutService = require('../services/stockoutService');
 const restockService = require('../services/restockService');
 const anomalyService = require('../services/anomalyService');
+const recommendationService = require('../services/recommendationService');
 const asyncHandler = require('../utils/asyncHandler');
 const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
@@ -82,6 +83,15 @@ const getAnomalies = asyncHandler(async (req, res) => {
   });
 });
 
+const getRecommendations = asyncHandler(async (req, res) => {
+  const result = await recommendationService.generateBusinessRecommendations();
+  res.status(200).json({
+    success: true,
+    message: 'AI Business Recommendations generated',
+    data: result
+  });
+});
+
 const seedHistory = asyncHandler(async (req, res) => {
   const result = await seedHistoricalOrderDataset();
   res.status(200).json({
@@ -100,5 +110,6 @@ module.exports = {
   getStockoutRisk,
   getRestockRecommendations,
   getAnomalies,
+  getRecommendations,
   seedHistory
 };
