@@ -1,4 +1,5 @@
 const aiService = require('../services/aiService');
+const forecastService = require('../services/forecastService');
 const asyncHandler = require('../utils/asyncHandler');
 const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
@@ -41,6 +42,16 @@ const getInsights = asyncHandler(async (req, res) => {
   });
 });
 
+const getForecast = asyncHandler(async (req, res) => {
+  const days = req.query.days ? parseInt(req.query.days, 10) : 30;
+  const result = await forecastService.predictDemand(days);
+  res.status(200).json({
+    success: true,
+    message: `Predictive AI Demand Forecast generated for ${days} days horizon`,
+    data: result
+  });
+});
+
 const seedHistory = asyncHandler(async (req, res) => {
   const result = await seedHistoricalOrderDataset();
   res.status(200).json({
@@ -55,5 +66,6 @@ module.exports = {
   chatAI,
   analyticsAI,
   getInsights,
+  getForecast,
   seedHistory
 };

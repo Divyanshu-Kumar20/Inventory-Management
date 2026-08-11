@@ -47,9 +47,16 @@ export const api = {
     return res.json();
   },
 
-  // AI Assistant & Business Insights API
+  // AI Assistant & Machine Learning Demand Forecasting API
   getAIInsights: async () => {
     const res = await fetch(`${BASE_URL}/ai/insights`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  getDemandForecast: async (days = 30) => {
+    const res = await fetch(`${BASE_URL}/ai/forecast?days=${days}`, {
       headers: getHeaders()
     });
     return res.json();
