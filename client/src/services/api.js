@@ -47,7 +47,7 @@ export const api = {
     return res.json();
   },
 
-  // AI Assistant, Demand Forecasting & Stockout Risk API
+  // AI Assistant, Demand Forecasting, Stockout & Smart Restocking API
   getAIInsights: async () => {
     const res = await fetch(`${BASE_URL}/ai/insights`, {
       headers: getHeaders()
@@ -64,6 +64,13 @@ export const api = {
 
   getStockoutRisk: async () => {
     const res = await fetch(`${BASE_URL}/ai/stockout-risk`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  getRestockRecommendations: async () => {
+    const res = await fetch(`${BASE_URL}/ai/restock-recommendations`, {
       headers: getHeaders()
     });
     return res.json();

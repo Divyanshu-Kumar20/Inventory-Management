@@ -1,6 +1,7 @@
 const aiService = require('../services/aiService');
 const forecastService = require('../services/forecastService');
 const stockoutService = require('../services/stockoutService');
+const restockService = require('../services/restockService');
 const asyncHandler = require('../utils/asyncHandler');
 const { seedHistoricalOrderDataset } = require('../seeders/historicalSeeder');
 
@@ -62,6 +63,15 @@ const getStockoutRisk = asyncHandler(async (req, res) => {
   });
 });
 
+const getRestockRecommendations = asyncHandler(async (req, res) => {
+  const result = await restockService.getRestockRecommendations();
+  res.status(200).json({
+    success: true,
+    message: 'Smart Restock Recommendations generated',
+    data: result
+  });
+});
+
 const seedHistory = asyncHandler(async (req, res) => {
   const result = await seedHistoricalOrderDataset();
   res.status(200).json({
@@ -78,5 +88,6 @@ module.exports = {
   getInsights,
   getForecast,
   getStockoutRisk,
+  getRestockRecommendations,
   seedHistory
 };
