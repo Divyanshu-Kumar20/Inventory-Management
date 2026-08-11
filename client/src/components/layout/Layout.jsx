@@ -6,15 +6,12 @@ import { Footer } from './Footer';
 
 export const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <div className="app-layout">
       <Sidebar
         isCollapsed={isCollapsed}
         toggleCollapse={() => setIsCollapsed(!isCollapsed)}
-        isMobileOpen={isMobileOpen}
-        closeMobile={() => setIsMobileOpen(false)}
       />
 
       <div
@@ -23,7 +20,7 @@ export const Layout = () => {
           marginLeft: isCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'
         }}
       >
-        <Navbar toggleMobileSidebar={() => setIsMobileOpen(!isMobileOpen)} />
+        <Navbar />
 
         <main className="content-container">
           <Outlet />

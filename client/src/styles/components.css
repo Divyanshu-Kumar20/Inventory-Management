@@ -3,6 +3,8 @@
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-primary);
+  position: relative;
+  overflow-x: hidden;
 }
 
 .main-wrapper {
@@ -19,12 +21,6 @@
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .content-container {
-    padding: 1rem;
-  }
 }
 
 /* Sidebar Component */
@@ -146,25 +142,13 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-}
-
-.sidebar-toggle-btn {
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-toggle-btn:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--text-main);
+  flex: 1;
 }
 
 .navbar-search {
   position: relative;
   width: 340px;
+  max-width: 100%;
 }
 
 .navbar-search input {
@@ -390,6 +374,7 @@
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
@@ -643,15 +628,81 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* Responsive Sidebar Drawer */
+/* ==========================================================================
+   Comprehensive Device Media Queries (Mobile, Tablet, Large Displays)
+   ========================================================================== */
+
+/* Medium Devices & Tablets (max-width: 1024px) */
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.mobile-open {
-    transform: translateX(0);
+    width: var(--sidebar-collapsed-width);
   }
   .main-wrapper {
-    margin-left: 0 !important;
+    margin-left: var(--sidebar-collapsed-width) !important;
+  }
+  .sidebar .user-info, .sidebar .nav-item span, .sidebar .brand-logo span {
+    display: none;
+  }
+  .sidebar .nav-item {
+    justify-content: center;
+    padding: 0.75rem 0;
+  }
+  .content-container {
+    padding: 1.25rem 1.5rem;
+  }
+  .navbar {
+    padding: 0 1.25rem;
+  }
+  .navbar-search {
+    width: 220px;
+  }
+}
+
+/* Small Devices & Mobile Phones (max-width: 640px) */
+@media (max-width: 640px) {
+  .sidebar {
+    width: var(--sidebar-collapsed-width);
+  }
+  .main-wrapper {
+    margin-left: var(--sidebar-collapsed-width) !important;
+  }
+  .content-container {
+    padding: 0.875rem 0.75rem;
+  }
+  .navbar {
+    padding: 0 0.75rem;
+  }
+  .navbar-search {
+    width: 150px;
+  }
+  .navbar-search input {
+    padding-left: 2.2rem;
+    font-size: 0.775rem;
+  }
+  .user-info {
+    display: none;
+  }
+  .user-profile-menu {
+    padding: 0.2rem;
+    border: none;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .page-title {
+    font-size: 1.25rem;
+  }
+  .stats-value {
+    font-size: 1.4rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+  .toast {
+    min-width: 280px;
+    right: 0.75rem;
+    bottom: 0.75rem;
   }
 }

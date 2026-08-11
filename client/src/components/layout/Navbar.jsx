@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Bell, Sun, Moon, Menu, User, Settings, LogOut, CheckCircle2 } from 'lucide-react';
+import { Search, Bell, Sun, Moon, User, Settings, LogOut, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
-export const Navbar = ({ toggleMobileSidebar }) => {
+export const Navbar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -44,10 +44,6 @@ export const Navbar = ({ toggleMobileSidebar }) => {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <button className="sidebar-toggle-btn" onClick={toggleMobileSidebar}>
-          <Menu size={22} />
-        </button>
-
         <div className="navbar-search">
           <Search size={18} className="navbar-search-icon" />
           <input
@@ -89,7 +85,8 @@ export const Navbar = ({ toggleMobileSidebar }) => {
                 position: 'absolute',
                 right: 0,
                 top: '50px',
-                width: '340px',
+                width: '320px',
+                maxWidth: '90vw',
                 zIndex: 100,
                 padding: '1rem'
               }}
