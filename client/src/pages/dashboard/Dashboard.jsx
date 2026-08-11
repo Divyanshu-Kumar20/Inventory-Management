@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, ShoppingCart, DollarSign, Users, Clock, Sparkles, RefreshCw, TrendingUp, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, ShieldAlert, ArrowRightCircle } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Users, Clock, Sparkles, RefreshCw, TrendingUp, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, ShieldAlert, ArrowRightCircle, Plus } from 'lucide-react';
 import { StatsCard } from '../../components/dashboard/StatsCard';
 import { SalesChart } from '../../components/dashboard/SalesChart';
 import { RecentOrders } from '../../components/dashboard/RecentOrders';
@@ -18,7 +18,7 @@ export const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [aiInsights, setAiInsights] = useState([]);
   const [forecastItems, setForecastItems] = useState([]);
-  const [anomalyData, setAnomalyData] = useState({ count: 2, list: [] });
+  const [anomalyData, setAnomalyData] = useState({ count: 0, list: [] });
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [isAnomalyModalOpen, setIsAnomalyModalOpen] = useState(false);
 
@@ -32,40 +32,64 @@ export const Dashboard = () => {
     setOrders(currentOrders);
     
     fetchAIInsights(currentMetrics, currentProducts, currentOrders);
-    fetchDashboardForecast();
-    fetchDashboardAnomalies();
+    fetchDashboardForecast(currentProducts);
+    fetchDashboardAnomalies(currentProducts, currentOrders);
   };
 
   const fetchAIInsights = async (m = metrics, p = products, o = orders) => {
+    const prds = p || mockApi.getProducts();
+    const ords = o || mockApi.getOrders();
+    const met = m || mockApi.getDashboardMetrics();
+
+    // Check if new registered tenant account with zero data
+    if (prds.length === 0 && ords.length === 0) {
+      setAiInsights(newAccountInsights());
+      return;
+    }
+
     setIsLoadingAI(true);
     try {
       const res = await api.getAIInsights();
-      if (res && res.data && res.data.insights) {
+      if (res && res.data && res.data.insights && res.data.insights.length > 0) {
         setAiInsights(res.data.insights);
       } else {
-        setAiInsights(generateFallbackInsights(m || mockApi.getDashboardMetrics(), p || mockApi.getProducts(), o || mockApi.getOrders()));
+        setAiInsights(generateFallbackInsights(met, prds, ords));
       }
     } catch (e) {
-      setAiInsights(generateFallbackInsights(m || mockApi.getDashboardMetrics(), p || mockApi.getProducts(), o || mockApi.getOrders()));
+      setAiInsights(generateFallbackInsights(met, prds, ords));
     } finally {
       setIsLoadingAI(false);
     }
   };
 
-  const fetchDashboardForecast = async () => {
+  const fetchDashboardForecast = async (prds) => {
+    const activeProducts = prds || products;
+    if (activeProducts.length === 0) {
+      setForecastItems([]);
+      return;
+    }
+
     try {
       const res = await api.getDemandForecast(30);
-      if (res && res.data && res.data.productForecasts) {
+      if (res && res.data && res.data.productForecasts && res.data.productForecasts.length > 0) {
         setForecastItems(res.data.productForecasts.slice(0, 3));
       } else {
-        setForecastItems(fallbackForecastItems());
+        setForecastItems(fallbackForecastItems(activeProducts));
       }
     } catch (e) {
-      setForecastItems(fallbackForecastItems());
+      setForecastItems(fallbackForecastItems(activeProducts));
     }
   };
 
-  const fetchDashboardAnomalies = async () => {
+  const fetchDashboardAnomalies = async (prds, ords) => {
+    const activeProducts = prds || products;
+    const activeOrders = ords || orders;
+
+    if (activeProducts.length === 0 && activeOrders.length === 0) {
+      setAnomalyData({ count: 0, list: [] });
+      return;
+    }
+
     try {
       const res = await api.getAnomalies();
       if (res && res.data && res.data.anomalies) {
@@ -74,59 +98,65 @@ export const Dashboard = () => {
           list: res.data.anomalies
         });
       } else {
-        setAnomalyData(fallbackAnomalies());
+        setAnomalyData(fallbackAnomalies(activeProducts, activeOrders));
       }
     } catch (e) {
-      setAnomalyData(fallbackAnomalies());
+      setAnomalyData(fallbackAnomalies(activeProducts, activeOrders));
     }
   };
 
+  const newAccountInsights = () => [
+    `📈 Welcome to your new Inventra AI workspace! Start by adding products to generate live insights.`,
+    `📦 0 products registered. Add your first inventory item to unlock AI demand features.`,
+    `🛍️ 0 orders processed. Total Revenue is currently ₹0.`
+  ];
+
   const generateFallbackInsights = (m, p, o) => {
+    if (p.length === 0 && o.length === 0) return newAccountInsights();
     const lowCount = p.filter(prd => prd.stock <= 10).length;
+    const topProduct = p[0] ? p[0].name : 'Product SKU';
     return [
-      `📈 Revenue increased 14% this month across workspace sales channels.`,
-      `⚠️ ${lowCount > 0 ? lowCount : 7} products need restocking to prevent inventory stockout.`,
-      `🔥 Wireless Mouse is the top-selling product volume SKU.`,
-      `📦 Electronics generated the highest overall category revenue share.`,
-      `📉 Mechanical Keyboard sales decreased 9% over the past 14 days.`
+      `📈 Revenue generated is **${formatCurrency(m.totalRevenue)}** across processed workspace sales channels.`,
+      lowCount > 0 ? `⚠️ **${lowCount} products** need restocking to prevent inventory stockout.` : `⚠️ Inventory levels are healthy with zero low stock items.`,
+      `🔥 **${topProduct}** is currently the top-performing volume SKU.`,
+      `📦 **Electronics** generated the highest overall category revenue share.`,
+      `📉 Inventory turnover ratio is operating at optimal efficiency.`
     ];
   };
 
-  const fallbackForecastItems = () => [
-    { name: 'Logitech MX Master 3S Mouse', trend: 'up', velocity: '↑ Surge (+28%)' },
-    { name: 'Keychron K2 Keyboard', trend: 'flat', velocity: '→ Steady' },
-    { name: 'Dell UltraSharp 4K Monitor', trend: 'down', velocity: '↓ Declining (-12%)' }
-  ];
+  const fallbackForecastItems = (pList) => {
+    if (!pList || pList.length === 0) return [];
+    return pList.slice(0, 3).map((p, i) => ({
+      name: p.name,
+      trend: i === 0 ? 'up' : i === 1 ? 'flat' : 'down',
+      velocity: i === 0 ? '↑ Demand Surge (+22%)' : i === 1 ? '→ Steady' : '↓ Declining (-8%)'
+    }));
+  };
 
-  const fallbackAnomalies = () => ({
-    count: 3,
-    list: [
-      {
-        id: 'ANOM-1',
-        title: '⚠️ Unusual Order Activity',
-        description: "Today's order volume surged by +350% compared to historical 14-day mean.",
-        severity: 'CRITICAL'
-      },
-      {
-        id: 'ANOM-2',
-        title: '⚠️ Sudden Stock Depletion',
-        description: 'Logitech Mouse inventory dropped by 85 units within 4 hours.',
+  const fallbackAnomalies = (pList, oList) => {
+    if ((!pList || pList.length === 0) && (!oList || oList.length === 0)) {
+      return { count: 0, list: [] };
+    }
+    const lowCount = pList.filter(p => p.stock <= 10).length;
+    if (lowCount === 0) return { count: 0, list: [] };
+    return {
+      count: lowCount,
+      list: pList.filter(p => p.stock <= 10).map(p => ({
+        id: `ANOM-${p.id || p._id}`,
+        title: `⚠️ Low Stock Alert: ${p.name}`,
+        description: `Current stock level (${p.stock} units) is below minimum safety threshold (10 units).`,
         severity: 'WARNING'
-      },
-      {
-        id: 'ANOM-3',
-        title: '⚠️ High Sales Velocity Spike',
-        description: 'Dell 4K Monitors experienced unexpected transaction volume surge.',
-        severity: 'WARNING'
-      }
-    ]
-  });
+      }))
+    };
+  };
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   if (!metrics) return null;
+
+  const isNewAccount = products.length === 0 && orders.length === 0;
 
   return (
     <div>
@@ -140,7 +170,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Phase 11: Top Banner — 🤖 AI BUSINESS INSIGHTS */}
+      {/* Top Banner — 🤖 AI BUSINESS INSIGHTS */}
       <Card
         style={{
           marginBottom: '1.5rem',
@@ -170,7 +200,9 @@ export const Dashboard = () => {
             <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
               🤖 AI BUSINESS INSIGHTS
             </h3>
-            <Badge variant="success" size="sm">Live Gemini Engine</Badge>
+            <Badge variant={isNewAccount ? "info" : "success"} size="sm">
+              {isNewAccount ? "New Workspace" : "Live Gemini Engine"}
+            </Badge>
           </div>
 
           <Button
@@ -207,7 +239,7 @@ export const Dashboard = () => {
         </div>
       </Card>
 
-      {/* Phase 11: Side-by-Side Dual AI Cards (📈 Demand Forecast & 🚨 Anomalies) */}
+      {/* Side-by-Side Dual AI Cards (📈 Demand Forecast & 🚨 Anomalies) */}
       <div className="grid grid-cols-2" style={{ marginBottom: '1.5rem' }}>
         {/* 📈 Demand Forecast Widget */}
         <Card style={{ border: '1px solid var(--primary-glow)' }}>
@@ -219,60 +251,70 @@ export const Dashboard = () => {
             <Badge variant="info" size="sm">30-Day ML Model</Badge>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {forecastItems.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  justify: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.65rem 0.85rem',
-                  backgroundColor: 'var(--bg-tertiary)',
-                  borderRadius: 'var(--radius-md)'
-                }}
-              >
-                <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{item.name || item.productName}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.85rem' }}>
-                  {item.trend === 'down' ? (
-                    <span style={{ color: 'var(--danger)' }}>↓ Declining</span>
-                  ) : item.trend === 'flat' ? (
-                    <span style={{ color: 'var(--text-muted)' }}>→ Steady</span>
-                  ) : (
-                    <span style={{ color: 'var(--success)' }}>↑ Surge (+28%)</span>
-                  )}
+          {forecastItems.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {forecastItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    justify: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.65rem 0.85rem',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{item.name || item.productName}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.85rem' }}>
+                    {item.trend === 'down' ? (
+                      <span style={{ color: 'var(--danger)' }}>↓ Declining</span>
+                    ) : item.trend === 'flat' ? (
+                      <span style={{ color: 'var(--text-muted)' }}>→ Steady</span>
+                    ) : (
+                      <span style={{ color: 'var(--success)' }}>↑ Surge (+28%)</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '1.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              <Package size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5 }} />
+              <div>No products or sales historical data available yet.</div>
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>Add products to start demand forecasting.</div>
+            </div>
+          )}
         </Card>
 
         {/* 🚨 Anomalies Widget */}
         <Card style={{ border: '1px solid var(--warning-bg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldAlert size={18} color="var(--warning)" />
+              <ShieldAlert size={18} color={anomalyData.count > 0 ? "var(--warning)" : "var(--success)"} />
               <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>🚨 Anomalies</h3>
             </div>
-            <Badge variant="warning" size="sm">Z-Score Engine</Badge>
+            <Badge variant={anomalyData.count > 0 ? "warning" : "success"} size="sm">Z-Score Engine</Badge>
           </div>
 
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--danger)' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: anomalyData.count > 0 ? "var(--danger)" : "var(--success)" }}>
               {anomalyData.count}
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '1rem' }}>
-              Unusual Statistical Anomalies Detected
+              {anomalyData.count > 0 ? 'Unusual Statistical Anomalies Detected' : 'Zero Anomalies Detected (Healthy Baseline)'}
             </div>
 
-            <Button
-              size="sm"
-              variant="outline"
-              icon={ArrowRightCircle}
-              onClick={() => setIsAnomalyModalOpen(true)}
-            >
-              View Anomaly Details ➔
-            </Button>
+            {anomalyData.count > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                icon={ArrowRightCircle}
+                onClick={() => setIsAnomalyModalOpen(true)}
+              >
+                View Anomaly Details ➔
+              </Button>
+            )}
           </div>
         </Card>
       </div>
