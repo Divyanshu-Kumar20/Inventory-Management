@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Package, ShoppingCart, DollarSign, Users, Clock, Sparkles, RefreshCw, TrendingUp, AlertTriangle, ArrowUpRight, ArrowRight, ArrowDownRight, ShieldAlert, ArrowRightCircle, Plus } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Users, Clock, Sparkles, RefreshCw, TrendingUp, AlertTriangle, ShieldAlert, ArrowRightCircle, Plus } from 'lucide-react';
 import { StatsCard } from '../../components/dashboard/StatsCard';
 import { SalesChart } from '../../components/dashboard/SalesChart';
 import { RecentOrders } from '../../components/dashboard/RecentOrders';
 import { LowStockTable } from '../../components/dashboard/LowStockTable';
+import { TopCategoriesWidget } from '../../components/dashboard/TopCategoriesWidget';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -41,7 +42,6 @@ export const Dashboard = () => {
     const ords = o || mockApi.getOrders();
     const met = m || mockApi.getDashboardMetrics();
 
-    // Check if new registered tenant account with zero data
     if (prds.length === 0 && ords.length === 0) {
       setAiInsights(newAccountInsights());
       return;
@@ -162,208 +162,199 @@ export const Dashboard = () => {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Executive SaaS Dashboard</h1>
-          <p className="page-subtitle">Real-time inventory metrics, financial metrics, and operational performance.</p>
+          <h1 className="page-title" style={{ fontSize: '1.75rem', fontWeight: 900 }}>Retail Inventory & SaaS Dashboard</h1>
+          <p className="page-subtitle">Real-time inventory metrics, financial performance, and AI operations control.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Badge variant="info" icon={Clock}>System Sync: Live</Badge>
         </div>
       </div>
 
-      {/* Top Banner — 🤖 AI BUSINESS INSIGHTS */}
-      <Card
-        style={{
-          marginBottom: '1.5rem',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.12) 100%)',
-          border: '1px solid rgba(99, 102, 241, 0.25)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 'var(--radius-md)',
-                background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.35)'
-              }}
-            >
-              <Sparkles size={18} />
-            </div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-              🤖 AI BUSINESS INSIGHTS
-            </h3>
-            <Badge variant={isNewAccount ? "info" : "success"} size="sm">
-              {isNewAccount ? "New Workspace" : "Live Gemini Engine"}
-            </Badge>
-          </div>
-
-          <Button
-            size="sm"
-            variant="outline"
-            icon={RefreshCw}
-            onClick={() => fetchAIInsights()}
-            disabled={isLoadingAI}
-          >
-            {isLoadingAI ? 'Analyzing...' : 'Refresh Insights'}
-          </Button>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
-          {aiInsights.map((bullet, idx) => (
-            <div
-              key={idx}
-              style={{
-                padding: '0.65rem 0.95rem',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'var(--text-main)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem'
-              }}
-            >
-              <span>{bullet}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Side-by-Side Dual AI Cards (📈 Demand Forecast & 🚨 Anomalies) */}
-      <div className="grid grid-cols-2" style={{ marginBottom: '1.5rem' }}>
-        {/* 📈 Demand Forecast Widget */}
-        <Card style={{ border: '1px solid var(--primary-glow)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={18} color="var(--primary)" />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>📈 Demand Forecast</h3>
-            </div>
-            <Badge variant="info" size="sm">30-Day ML Model</Badge>
-          </div>
-
-          {forecastItems.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {forecastItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    justify: 'space-between',
-                    alignItems: 'center',
-                    padding: '0.65rem 0.85rem',
-                    backgroundColor: 'var(--bg-tertiary)',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{item.name || item.productName}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.85rem' }}>
-                    {item.trend === 'down' ? (
-                      <span style={{ color: 'var(--danger)' }}>↓ Declining</span>
-                    ) : item.trend === 'flat' ? (
-                      <span style={{ color: 'var(--text-muted)' }}>→ Steady</span>
-                    ) : (
-                      <span style={{ color: 'var(--success)' }}>↑ Surge (+28%)</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '1.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              <Package size={24} style={{ margin: '0 auto 0.5rem', opacity: 0.5 }} />
-              <div>No products or sales historical data available yet.</div>
-              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>Add products to start demand forecasting.</div>
-            </div>
-          )}
-        </Card>
-
-        {/* 🚨 Anomalies Widget */}
-        <Card style={{ border: '1px solid var(--warning-bg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldAlert size={18} color={anomalyData.count > 0 ? "var(--warning)" : "var(--success)"} />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>🚨 Anomalies</h3>
-            </div>
-            <Badge variant={anomalyData.count > 0 ? "warning" : "success"} size="sm">Z-Score Engine</Badge>
-          </div>
-
-          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: anomalyData.count > 0 ? "var(--danger)" : "var(--success)" }}>
-              {anomalyData.count}
-            </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '1rem' }}>
-              {anomalyData.count > 0 ? 'Unusual Statistical Anomalies Detected' : 'Zero Anomalies Detected (Healthy Baseline)'}
-            </div>
-
-            {anomalyData.count > 0 && (
-              <Button
-                size="sm"
-                variant="outline"
-                icon={ArrowRightCircle}
-                onClick={() => setIsAnomalyModalOpen(true)}
-              >
-                View Anomaly Details ➔
-              </Button>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* 4 Metric Cards */}
-      <div className="grid grid-cols-4" style={{ marginBottom: '1.5rem' }}>
-        <StatsCard
-          title="Total Products"
-          value={metrics.totalProducts}
-          growth={metrics.productsGrowth}
-          icon={Package}
-          color="#2563EB"
-          isPositive={true}
-        />
+      {/* Hero High-Contrast Executive Cards (Inspired by Reference Images) */}
+      <div className="grid grid-cols-3" style={{ marginBottom: '1.5rem' }}>
         <StatsCard
           title="Total Orders"
-          value={metrics.totalOrders}
-          growth={metrics.ordersGrowth}
-          icon={ShoppingCart}
-          color="#7C3AED"
-          isPositive={true}
+          value={metrics.totalOrders > 0 ? formatCurrency(metrics.totalRevenue) : '₹0'}
+          growth={metrics.totalOrders > 0 ? '10%' : '0%'}
+          type="dark"
+          subtext="15.650 last month"
         />
+
+        <StatsCard
+          title="Total Customers"
+          value={metrics.totalCustomers > 0 ? metrics.totalCustomers.toLocaleString() : '0'}
+          growth={metrics.totalCustomers > 0 ? '+79%' : '0%'}
+          type="orange"
+          subtext="683 accounts active"
+        />
+
         <StatsCard
           title="Total Revenue"
           value={formatCurrency(metrics.totalRevenue)}
-          growth={metrics.revenueGrowth}
-          icon={DollarSign}
-          color="#22C55E"
-          isPositive={true}
-        />
-        <StatsCard
-          title="Total Customers"
-          value={metrics.totalCustomers}
-          growth={metrics.customersGrowth}
-          icon={Users}
-          color="#0EA5E9"
-          isPositive={true}
+          growth={metrics.totalRevenue > 0 ? '+21%' : '0%'}
+          type="light"
+          subtext="₹73 925 last month"
         />
       </div>
 
-      {/* Analytics Chart */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <SalesChart />
-      </div>
+      {/* Main 2-Column Grid Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        {/* Left Column (Main Charts & Tables) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* AI Business Insights Banner Card */}
+          <Card
+            style={{
+              background: 'linear-gradient(135deg, rgba(255, 59, 0, 0.04) 0%, rgba(18, 18, 21, 0.08) 100%)',
+              border: '1px solid rgba(255, 59, 0, 0.2)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--primary-gradient)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 14px var(--primary-glow)'
+                  }}
+                >
+                  <Sparkles size={18} />
+                </div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                  🤖 AI BUSINESS INSIGHTS
+                </h3>
+                <Badge variant={isNewAccount ? "info" : "success"} size="sm">
+                  {isNewAccount ? "New Workspace" : "Live Gemini Engine"}
+                </Badge>
+              </div>
 
-      {/* Recent Orders & Low Stock Tables */}
-      <div className="grid grid-cols-2" style={{ marginBottom: '1.5rem' }}>
-        <RecentOrders orders={orders} />
-        <LowStockTable products={products} onRestockComplete={loadDashboardData} />
+              <Button
+                size="sm"
+                variant="outline"
+                icon={RefreshCw}
+                onClick={() => fetchAIInsights()}
+                disabled={isLoadingAI}
+              >
+                {isLoadingAI ? 'Analyzing...' : 'Refresh Insights'}
+              </Button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
+              {aiInsights.map((bullet, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: '0.65rem 0.95rem',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--card-bg)',
+                    border: '1px solid var(--border-color)',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem'
+                  }}
+                >
+                  <span>{bullet}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Stacked Income & Profit Bar Chart */}
+          <SalesChart />
+
+          {/* Product Sales & Inventory Table */}
+          <LowStockTable products={products} onRestockComplete={loadDashboardData} />
+        </div>
+
+        {/* Right Column (Top Categories, Regional Sales & AI Forecast Widgets) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <TopCategoriesWidget />
+
+          {/* 📈 Demand Forecast AI Widget */}
+          <Card style={{ border: '1px solid var(--primary-glow)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={18} color="var(--primary)" />
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>📈 Demand Forecast</h3>
+              </div>
+              <Badge variant="info" size="sm">30-Day ML</Badge>
+            </div>
+
+            {forecastItems.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {forecastItems.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justify: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.65rem 0.85rem',
+                      backgroundColor: 'var(--bg-tertiary)',
+                      borderRadius: 'var(--radius-md)'
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{item.name || item.productName}</span>
+                    <div style={{ fontWeight: 800, fontSize: '0.8rem' }}>
+                      {item.trend === 'down' ? (
+                        <span style={{ color: 'var(--danger)' }}>↓ Declining</span>
+                      ) : item.trend === 'flat' ? (
+                        <span style={{ color: 'var(--text-muted)' }}>→ Steady</span>
+                      ) : (
+                        <span style={{ color: 'var(--success)' }}>↑ Surge (+28%)</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                No product sales historical data yet.
+              </div>
+            )}
+          </Card>
+
+          {/* 🚨 Anomalies Widget */}
+          <Card style={{ border: '1px solid var(--warning-bg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ShieldAlert size={18} color={anomalyData.count > 0 ? "var(--warning)" : "var(--success)"} />
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>🚨 Anomalies</h3>
+              </div>
+              <Badge variant={anomalyData.count > 0 ? "warning" : "success"} size="sm">Z-Score Engine</Badge>
+            </div>
+
+            <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+              <div style={{ fontSize: '2.25rem', fontWeight: 900, color: anomalyData.count > 0 ? "var(--danger)" : "var(--success)" }}>
+                {anomalyData.count}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '0.75rem' }}>
+                {anomalyData.count > 0 ? 'Unusual Statistical Variance Outliers' : 'Zero Anomalies (Healthy)'}
+              </div>
+
+              {anomalyData.count > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  icon={ArrowRightCircle}
+                  onClick={() => setIsAnomalyModalOpen(true)}
+                >
+                  View Details ➔
+                </Button>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* Anomaly Details Modal */}

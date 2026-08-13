@@ -1,44 +1,46 @@
-/* CSS Variables - NextGen Enterprise SaaS Design System */
+/* CSS Variables - Ultra-Luxe Modern SaaS Design System */
 
 :root {
-  /* Primary & Accent Color Palette */
-  --primary: #4F46E5;
-  --primary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
-  --primary-hover: #4338CA;
-  --primary-light: #EEF2FF;
-  --primary-glow: rgba(99, 102, 241, 0.25);
+  /* Primary & Vibrant Accent Color Palette */
+  --primary: #FF3B00;
+  --primary-gradient: linear-gradient(135deg, #FF5500 0%, #FF2500 100%);
+  --primary-hover: #E03300;
+  --primary-light: #FFF0EC;
+  --primary-glow: rgba(255, 59, 0, 0.25);
 
+  --accent-orange: #FF3B00;
+  --accent-dark: #121215;
   --accent-cyan: #06B6D4;
   --accent-purple: #8B5CF6;
 
   /* Canvas & Surface Colors */
-  --bg-primary: #F8FAFC;
+  --bg-primary: #F4F6F9;
   --bg-secondary: #FFFFFF;
-  --bg-tertiary: #F1F5F9;
+  --bg-tertiary: #EAEFF5;
 
   /* Sidebar Theme */
-  --sidebar-bg: #090D16;
-  --sidebar-hover: #1E293B;
-  --sidebar-active: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
-  --sidebar-text: #94A3B8;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-hover: #F1F5F9;
+  --sidebar-active: #FF3B00;
+  --sidebar-text: #64748B;
   --sidebar-text-active: #FFFFFF;
 
   /* Cards & Elevational Surfaces */
   --card-bg: #FFFFFF;
-  --card-border: #E2E8F0;
-  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-  --card-shadow-hover: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --card-border: #E5E7EB;
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
+  --card-shadow-hover: 0 20px 35px -5px rgba(0, 0, 0, 0.08), 0 8px 15px -4px rgba(0, 0, 0, 0.04);
 
   /* Typography Colors */
-  --text-main: #0F172A;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
+  --text-main: #111827;
+  --text-muted: #6B7280;
+  --text-light: #9CA3AF;
 
   /* Inputs & Form Elements */
-  --border-color: #E2E8F0;
+  --border-color: #E5E7EB;
   --input-bg: #FFFFFF;
-  --input-border: #CBD5E1;
-  --input-focus-border: #6366F1;
+  --input-border: #D1D5DB;
+  --input-focus-border: #FF3B00;
 
   /* Status Indicators (Emerald, Amber, Rose, Cyan) */
   --success: #10B981;
@@ -62,50 +64,50 @@
   
   /* Layout Dimensions */
   --sidebar-width: 260px;
-  --sidebar-collapsed-width: 80px;
-  --navbar-height: 68px;
+  --sidebar-collapsed-width: 84px;
+  --navbar-height: 72px;
 
   /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
 
-  /* Smooth Transitions */
+  /* Transitions */
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='dark'] {
-  --primary: #6366F1;
-  --primary-gradient: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
-  --primary-hover: #4F46E5;
-  --primary-light: rgba(99, 102, 241, 0.15);
-  --primary-glow: rgba(99, 102, 241, 0.35);
+  --primary: #FF4500;
+  --primary-gradient: linear-gradient(135deg, #FF5500 0%, #FF3300 100%);
+  --primary-hover: #E03800;
+  --primary-light: rgba(255, 69, 0, 0.15);
+  --primary-glow: rgba(255, 69, 0, 0.35);
 
-  --bg-primary: #070A11;
-  --bg-secondary: #0F172A;
-  --bg-tertiary: #1E293B;
+  --bg-primary: #0A0D14;
+  --bg-secondary: #121620;
+  --bg-tertiary: #1A202C;
 
-  --sidebar-bg: #070A11;
-  --sidebar-hover: #1E293B;
-  --sidebar-active: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --sidebar-bg: #0A0D14;
+  --sidebar-hover: #1A202C;
+  --sidebar-active: #FF4500;
   --sidebar-text: #94A3B8;
   --sidebar-text-active: #FFFFFF;
 
-  --card-bg: #0F172A;
-  --card-border: #1E293B;
-  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-  --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+  --card-bg: #121620;
+  --card-border: #1E2638;
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 20px 35px -5px rgba(0, 0, 0, 0.7);
 
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --text-light: #64748B;
+  --text-main: #F9FAFB;
+  --text-muted: #9CA3AF;
+  --text-light: #6B7280;
 
-  --border-color: #1E293B;
-  --input-bg: #1E293B;
-  --input-border: #334155;
-  --input-focus-border: #818CF8;
+  --border-color: #1E2638;
+  --input-bg: #1A202C;
+  --input-border: #2D3748;
+  --input-focus-border: #FF4500;
 
   --success-bg: rgba(16, 185, 129, 0.15);
   --success-text: #34D399;
