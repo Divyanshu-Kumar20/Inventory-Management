@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Bot,
   Package,
   Layers,
   ShoppingCart,
@@ -13,8 +12,7 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight,
-  ShieldCheck
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -26,7 +24,6 @@ export const Sidebar = ({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
 
   const menuItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'AI Assistant', path: '/ai-assistant', icon: Bot, badge: 'AI ML' },
     { label: 'Products', path: '/products', icon: Package },
     { label: 'Categories', path: '/categories', icon: Layers },
     { label: 'Orders', path: '/orders', icon: ShoppingCart },

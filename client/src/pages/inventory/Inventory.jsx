@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Boxes, ArrowUpRight, ArrowDownRight, History, SlidersHorizontal, AlertTriangle, Plus, Minus, PackageCheck, FileSpreadsheet, Eye, TrendingUp, Sparkles, RefreshCw } from 'lucide-react';
+import { Boxes, SlidersHorizontal, Plus } from 'lucide-react';
 import { Table } from '../../components/common/Table';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
@@ -7,19 +7,13 @@ import { Badge } from '../../components/common/Badge';
 import { Modal } from '../../components/common/Modal';
 import { Input } from '../../components/common/Input';
 import { mockApi } from '../../services/mockApi';
-import { api } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 import { useToast } from '../../context/ToastContext';
 
 export const Inventory = () => {
   const [products, setProducts] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [activeTab, setActiveTab] = useState('current'); // 'current' | 'logs' | 'forecast'
-  
-  // Phase 6: Forecast State
-  const [forecastHorizon, setForecastHorizon] = useState(30); // 7 | 14 | 30
-  const [forecastData, setForecastData] = useState(null);
-  const [isLoadingForecast, setIsLoadingForecast] = useState(false);
+  const [activeTab, setActiveTab] = useState('current'); // 'current' | 'logs'
 
   // Stock Adjustment Modal
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
@@ -29,7 +23,7 @@ export const Inventory = () => {
   const [reason, setReason] = useState('Supplier Restock');
 
   // KPI Breakdown Modals
-  const [activeKpiModal, setActiveKpiModal] = useState(null); // 'units' | 'lowStock' | 'logsModal' | null
+  const [activeKpiModal, setActiveKpiModal] = useState(null);
   
   // Quick Restock inside Low Stock Modal
   const [quickRestockItem, setQuickRestockItem] = useState(null);
@@ -40,32 +34,11 @@ export const Inventory = () => {
   const loadData = () => {
     setProducts(mockApi.getProducts());
     setLogs(mockApi.getInventoryLogs());
-    fetchForecast(forecastHorizon);
-  };
-
-  const fetchForecast = async (days = 30) => {
-    setIsLoadingForecast(true);
-    try {
-      const res = await api.getDemandForecast(days);
-      if (res && res.data) {
-        setForecastData(res.data);
-      }
-    } catch (e) {
-      console.warn('Forecast API fallback', e);
-    } finally {
-      setIsLoadingForecast(false);
-    }
   };
 
   useEffect(() => {
     loadData();
   }, []);
-
-  const handleHorizonChange = (days) => {
-    setForecastHorizon(days);
-    fetchForecast(days);
-    toast.info(`Updated AI ML Demand Forecast horizon to ${days} Days`);
-  };
 
   const handleStockAdjustment = (e) => {
     e.preventDefault();
@@ -200,8 +173,8 @@ export const Inventory = () => {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Warehouse Inventory Control & AI Demand Forecasting</h1>
-          <p className="page-subtitle">Monitor stock movements, execute ML demand predictions, and view audit trail logs.</p>
+          <h1 className="page-title">Warehouse Inventory Control</h1>
+          <p className="page-subtitle">Monitor stock movements, execute inventory adjustments, and view audit trail logs.</p>
         </div>
         <Button
           variant="primary"
@@ -215,51 +188,6 @@ export const Inventory = () => {
           Stock Adjustment
         </Button>
       </div>
-
-      {/* Phase 6: AI Demand Forecasting Executive Card */}
-      <Card style={{ marginBottom: '1.5rem', border: '1px solid var(--primary-glow)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={20} />
-            </div>
-            <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>📈 AI ML Demand Forecasting Model</h3>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>scikit-learn Ridge Regressor Baseline Model (Confidence: 94.2%)</span>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Horizon:</span>
-            <Button size="sm" variant={forecastHorizon === 7 ? 'primary' : 'outline'} onClick={() => handleHorizonChange(7)}>7 Days</Button>
-            <Button size="sm" variant={forecastHorizon === 14 ? 'primary' : 'outline'} onClick={() => handleHorizonChange(14)}>14 Days</Button>
-            <Button size="sm" variant={forecastHorizon === 30 ? 'primary' : 'outline'} onClick={() => handleHorizonChange(30)}>30 Days</Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3" style={{ marginTop: '0.5rem' }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Predicted 7-Day Demand</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
-              {forecastData?.summary?.horizon7DaysTotal || Math.round(totalStockUnits * 0.15)} Units
-            </div>
-          </div>
-
-          <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Predicted 14-Day Demand</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#7C3AED' }}>
-              {forecastData?.summary?.horizon14DaysTotal || Math.round(totalStockUnits * 0.28)} Units
-            </div>
-          </div>
-
-          <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Predicted 30-Day Demand</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--success)' }}>
-              {forecastData?.summary?.horizon30DaysTotal || Math.round(totalStockUnits * 0.55)} Units
-            </div>
-          </div>
-        </div>
-      </Card>
 
       {/* Interactive KPI Cards */}
       <div className="grid grid-cols-3" style={{ marginBottom: '1.5rem' }}>
@@ -332,7 +260,6 @@ export const Inventory = () => {
         <Button
           variant={activeTab === 'logs' ? 'primary' : 'outline'}
           size="sm"
-          icon={History}
           onClick={() => setActiveTab('logs')}
         >
           Inventory Adjustment Logs ({logs.length} Events)

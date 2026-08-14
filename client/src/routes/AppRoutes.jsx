@@ -12,7 +12,6 @@ import { Inventory } from '../pages/inventory/Inventory';
 import { Reports } from '../pages/reports/Reports';
 import { Settings } from '../pages/settings/Settings';
 import { Profile } from '../pages/profile/Profile';
-import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
 import { NotFound } from '../pages/NotFound';
 import { useAuth } from '../context/AuthContext';
 
@@ -44,7 +43,6 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="ai-assistant" element={<AIAssistantPage />} />
         <Route path="products" element={<Products />} />
         <Route path="categories" element={<Categories />} />
         <Route path="orders" element={<Orders />} />

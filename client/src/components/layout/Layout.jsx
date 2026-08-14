@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { AIAssistantWidget } from '../common/AIAssistantWidget';
 
 export const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -29,9 +28,6 @@ export const Layout = () => {
 
         <Footer />
       </div>
-
-      {/* Inventra AI Assistant Floating Widget */}
-      <AIAssistantWidget />
     </div>
   );
 };
