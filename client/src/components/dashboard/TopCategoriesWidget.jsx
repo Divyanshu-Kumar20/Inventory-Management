@@ -2,9 +2,89 @@ import React, { useState } from 'react';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { Download, ArrowUpRight } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 export const TopCategoriesWidget = () => {
   const [filter, setFilter] = useState('Monthly');
+  const toast = useToast();
+
+  // Dynamic Category Breakdown Data based on Time Horizon
+  const categoryData = {
+    'All time': {
+      topPercent: '42%',
+      topCategory: 'Electronics',
+      stroke1: '145 205', // 42%
+      stroke2: '90 260',  // 28%
+      offset2: '-145',
+      stroke3: '60 290',  // 18%
+      offset3: '-235',
+      stroke4: '40 310',  // 12%
+      offset4: '-295',
+      electronics: '42%',
+      furniture: '28%',
+      appliances: '18%',
+      stationery: '12%'
+    },
+    'Weekly': {
+      topPercent: '48%',
+      topCategory: 'Electronics',
+      stroke1: '165 185', // 48%
+      stroke2: '80 270',  // 24%
+      offset2: '-165',
+      stroke3: '60 290',  // 18%
+      offset3: '-245',
+      stroke4: '35 315',  // 10%
+      offset4: '-305',
+      electronics: '48%',
+      furniture: '24%',
+      appliances: '18%',
+      stationery: '10%'
+    },
+    'Monthly': {
+      topPercent: '35%',
+      topCategory: 'Electronics',
+      stroke1: '120 230', // 35%
+      stroke2: '80 270',  // 23%
+      offset2: '-120',
+      stroke3: '70 280',  // 20%
+      offset3: '-200',
+      stroke4: '75 275',  // 22%
+      offset4: '-270',
+      electronics: '35%',
+      furniture: '23%',
+      appliances: '20%',
+      stationery: '22%'
+    }
+  };
+
+  const activeData = categoryData[filter];
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    toast.info(`Switched category breakdown view to ${newFilter}`, 'Filter Updated');
+  };
+
+  const handleExportStatistics = () => {
+    const csvRows = [
+      ['Region', 'Sales Volume Share (%)', 'Target Fulfillment Status'],
+      ['USA', '25%', 'Optimal'],
+      ['Japan', '22%', 'Exceeding Target'],
+      ['UK', '20%', 'Optimal'],
+      ['Korea', '18%', 'Steady'],
+      ['Spain', '15%', 'Growth Target']
+    ];
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `inventra_regional_sales_statistics_${filter.toLowerCase().replace(' ', '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success('Downloaded Regional Sales Statistics CSV report', 'Export Complete');
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -17,30 +97,34 @@ export const TopCategoriesWidget = () => {
 
         {/* SVG Donut Ring Visualization */}
         <div style={{ display: 'flex', justifyContent: 'center', margin: '0.75rem 0', position: 'relative' }}>
-          <svg viewBox="0 0 160 160" style={{ width: '150px', height: '150px', transform: 'rotate(-90deg)' }}>
-            {/* 35% Electronics (Dark Graphite) */}
-            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#121215" strokeWidth="24" strokeDasharray="120 230" />
-            {/* 23% Furniture (Electric Orange) */}
-            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#FF3B00" strokeWidth="24" strokeDasharray="80 270" strokeDashoffset="-120" />
-            {/* 20% Appliances (Light Grey) */}
-            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#CBD5E1" strokeWidth="24" strokeDasharray="70 280" strokeDashoffset="-200" />
-            {/* 12% Stationery (Dark Textured) */}
-            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#334155" strokeWidth="24" strokeDasharray="40 310" strokeDashoffset="-270" />
+          <svg viewBox="0 0 160 160" style={{ width: '150px', height: '150px', transform: 'rotate(-90deg)', transition: 'all 0.4s ease' }}>
+            {/* Slice 1: Electronics (Dark Graphite) */}
+            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#121215" strokeWidth="24" strokeDasharray={activeData.stroke1} style={{ transition: 'all 0.4s ease' }} />
+            {/* Slice 2: Furniture (Electric Orange) */}
+            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#FF3B00" strokeWidth="24" strokeDasharray={activeData.stroke2} strokeDashoffset={activeData.offset2} style={{ transition: 'all 0.4s ease' }} />
+            {/* Slice 3: Appliances (Light Grey) */}
+            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#CBD5E1" strokeWidth="24" strokeDasharray={activeData.stroke3} strokeDashoffset={activeData.offset3} style={{ transition: 'all 0.4s ease' }} />
+            {/* Slice 4: Stationery (Dark Textured) */}
+            <circle cx="80" cy="80" r="55" fill="transparent" stroke="#334155" strokeWidth="24" strokeDasharray={activeData.stroke4} strokeDashoffset={activeData.offset4} style={{ transition: 'all 0.4s ease' }} />
           </svg>
 
           {/* Centered % Text */}
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>35%</div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>Electronics</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)', transition: 'all 0.3s ease' }}>
+              {activeData.topPercent}
+            </div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+              {activeData.topCategory}
+            </div>
           </div>
         </div>
 
-        {/* Legend Indicator */}
+        {/* Dynamic Legend Indicator */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.725rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '1rem' }}>
-          <span><strong style={{ color: '#121215' }}>●</strong> Electronics</span>
-          <span><strong style={{ color: '#FF3B00' }}>●</strong> Furniture</span>
-          <span><strong style={{ color: '#CBD5E1' }}>●</strong> Appliances</span>
-          <span><strong style={{ color: '#334155' }}>●</strong> Stationery</span>
+          <span><strong style={{ color: '#121215' }}>●</strong> Electronics ({activeData.electronics})</span>
+          <span><strong style={{ color: '#FF3B00' }}>●</strong> Furniture ({activeData.furniture})</span>
+          <span><strong style={{ color: '#CBD5E1' }}>●</strong> Appliances ({activeData.appliances})</span>
+          <span><strong style={{ color: '#334155' }}>●</strong> Stationery ({activeData.stationery})</span>
         </div>
 
         {/* Time Filter Pills */}
@@ -49,8 +133,8 @@ export const TopCategoriesWidget = () => {
             <div
               key={f}
               className={`pill-option ${filter === f ? 'active' : ''}`}
-              onClick={() => setFilter(f)}
-              style={{ flex: 1, textAlign: 'center' }}
+              onClick={() => handleFilterChange(f)}
+              style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}
             >
               {f}
             </div>
@@ -90,7 +174,8 @@ export const TopCategoriesWidget = () => {
 
         <Button
           variant="primary"
-          style={{ width: '100%', marginTop: '1rem', backgroundColor: '#121215', color: '#FFFFFF', borderRadius: 'var(--radius-full)' }}
+          onClick={handleExportStatistics}
+          style={{ width: '100%', marginTop: '1rem', backgroundColor: '#121215', color: '#FFFFFF', borderRadius: 'var(--radius-full)', cursor: 'pointer' }}
           icon={Download}
         >
           Export Statistics
